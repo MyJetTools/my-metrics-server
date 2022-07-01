@@ -12,6 +12,7 @@ use super::models::NewMetricsEvent;
     controller: "api",
     description: "New Metric Event",
     input_data: "NewMetricsEvent",
+
 )]
 pub struct PostMetricAction {
     app: Arc<AppContext>,

@@ -11,6 +11,10 @@ use super::models::*;
     route: "/ui/GetServices",
     controller: "ui",
     description: "New Metric Event",
+    result:[
+        {status_code: 200, description: "List of apps", model="GetServicesResponse"},
+
+    ]
 )]
 pub struct GetServicesAction {
     app: Arc<AppContext>,
@@ -27,7 +31,7 @@ async fn handle_request(
 ) -> Result<HttpOkResult, HttpFailResult> {
     let read_access = action.app.metrics.lock().await;
 
-    let result = GetServices {
+    let result = GetServicesResponse {
         names: read_access.get_services(),
     };
 

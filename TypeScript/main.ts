@@ -58,12 +58,12 @@ class main {
         if (this.requested)
             return;
 
-        this.requested = true;
-        $.ajax({ url: '/api/status', type: 'get' })
-            .then((result: IStatusContract) => {
+
+        $.ajax({ url: '/ui/GetServices', type: 'get' })
+            .then((result: IServicesList) => {
                 this.requested = false;
 
-                this.layoutElement.innerHTML = HtmlMain.generateContent(result);
+                this.layoutElement.innerHTML = HtmlMain.generateServicesList(result);
 
 
                 HtmlStatusBar.updateOnline();
@@ -78,4 +78,4 @@ class main {
 
 let $: any;
 
-window.setInterval(() => main.background(), 1000);
+window.setTimeout(() => main.background(), 1000);

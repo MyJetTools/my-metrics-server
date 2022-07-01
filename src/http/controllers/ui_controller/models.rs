@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-pub struct GetServices {
+pub struct GetServicesResponse {
     pub names: Vec<String>,
 }

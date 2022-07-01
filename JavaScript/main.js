@@ -26,11 +26,10 @@ var main = /** @class */ (function () {
         this.resize();
         if (this.requested)
             return;
-        this.requested = true;
-        $.ajax({ url: '/api/status', type: 'get' })
+        $.ajax({ url: '/ui/GetServices', type: 'get' })
             .then(function (result) {
             _this.requested = false;
-            _this.layoutElement.innerHTML = HtmlMain.generateContent(result);
+            _this.layoutElement.innerHTML = HtmlMain.generateServicesList(result);
             HtmlStatusBar.updateOnline();
         }).fail(function () {
             _this.requested = false;
@@ -42,5 +41,5 @@ var main = /** @class */ (function () {
     return main;
 }());
 var $;
-window.setInterval(function () { return main.background(); }, 1000);
+window.setTimeout(function () { return main.background(); }, 1000);
 //# sourceMappingURL=main.js.map
