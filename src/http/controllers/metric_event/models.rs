@@ -20,4 +20,7 @@ pub struct NewMetric {
     pub service_name: String,
     #[serde(rename = "serviceData")]
     pub service_data: String,
+    pub success: bool,
+    #[serde(rename = "statusCode")]
+    pub status_code: i32,
 }

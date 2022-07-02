@@ -22,6 +22,8 @@ impl ServiesMetrics {
         started: i64,
         finished: i64,
         process_id: i64,
+        success: bool,
+        status_code: i32,
     ) {
         if !self.metrics.contains_key(service_name.as_str()) {
             self.metrics.insert(service_name.clone(), BTreeMap::new());
@@ -41,6 +43,8 @@ impl ServiesMetrics {
                 finished: DateTimeAsMicroseconds::new(finished),
                 service_name,
                 service_data,
+                success,
+                status_code,
             });
     }
 

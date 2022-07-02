@@ -5,4 +5,6 @@ pub struct MetricEvent {
     pub finished: DateTimeAsMicroseconds,
     pub service_name: String,
     pub service_data: String,
+    pub success: bool,
+    pub status_code: i32,
 }

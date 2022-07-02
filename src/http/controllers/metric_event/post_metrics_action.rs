@@ -37,6 +37,8 @@ async fn handle_request(
             metrics.started,
             metrics.ended,
             metrics.process_id,
+            metrics.success,
+            metrics.status_code,
         )
     }
 

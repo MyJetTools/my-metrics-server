@@ -16,4 +16,5 @@ class HtmlMain {
         return result + '</td><td style="width:100%"></td></tr></table>';
     }
 
+
 }
