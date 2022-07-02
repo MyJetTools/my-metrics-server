@@ -8,7 +8,7 @@ use super::models::NewMetricsEvent;
 
 #[my_http_server_swagger::http_route(
     method: "POST",
-    route: "/api/metric_event",
+    route: "/api/add",
     controller: "api",
     description: "New Metric Event",
     input_data: "NewMetricsEvent",
