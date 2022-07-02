@@ -1,4 +1,4 @@
 FROM rust:slim
-COPY ./target/release/services-status ./target/release/services-status 
+COPY ./target/release/my-telemetry-server ./target/release/my-telemetry-server
 COPY ./wwwroot ./wwwroot 
-ENTRYPOINT ["./target/release/services-status"]
+ENTRYPOINT ["./target/release/my-telemetry-server"]
