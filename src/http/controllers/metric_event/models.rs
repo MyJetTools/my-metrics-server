@@ -18,9 +18,8 @@ pub struct NewMetric {
     pub ended: i64,
     #[serde(rename = "serviceName")]
     pub service_name: String,
-    #[serde(rename = "serviceData")]
-    pub service_data: String,
-    pub success: bool,
-    #[serde(rename = "statusCode")]
-    pub status_code: i32,
+    #[serde(rename = "eventData")]
+    pub event_data: String,
+    pub success: Option<String>,
+    pub fail: Option<String>,
 }

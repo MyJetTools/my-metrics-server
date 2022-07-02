@@ -33,12 +33,12 @@ async fn handle_request(
     for metrics in input_data.metrics {
         metrics_write_access.new_event(
             metrics.service_name,
-            metrics.service_data,
+            metrics.event_data,
             metrics.started,
             metrics.ended,
             metrics.process_id,
             metrics.success,
-            metrics.status_code,
+            metrics.fail,
         )
     }
 

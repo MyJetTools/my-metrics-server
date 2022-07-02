@@ -18,12 +18,12 @@ impl ServiesMetrics {
     pub fn new_event(
         &mut self,
         service_name: String,
-        service_data: String,
+        event_data: String,
         started: i64,
         finished: i64,
         process_id: i64,
-        success: bool,
-        status_code: i32,
+        success: Option<String>,
+        fail: Option<String>,
     ) {
         if !self.metrics.contains_key(service_name.as_str()) {
             self.metrics.insert(service_name.clone(), BTreeMap::new());
@@ -42,9 +42,9 @@ impl ServiesMetrics {
                 started: DateTimeAsMicroseconds::new(started),
                 finished: DateTimeAsMicroseconds::new(finished),
                 service_name,
-                service_data,
+                event_data,
                 success,
-                status_code,
+                fail,
             });
     }
 
