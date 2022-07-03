@@ -26,7 +26,7 @@ class HtmlMain {
             if (overview.error > 0) {
                 errors = '<span style="color:red">' + errors + '</span>';
             }
-            result += '<tr><td>' + overview.data + '</td><td>' + overview.max + '</td><td>' + overview.min + '</td><td>' + overview.avg + '</td><td>' + overview.success + '</td><td>' + overview.error + '</td><td>' + overview.total + '</td></tr>'
+            result += '<tr><td>' + overview.data + '</td><td>' + this.micros_to_string(overview.max) + '</td><td>' + this.micros_to_string(overview.min) + '</td><td>' + this.micros_to_string(overview.avg) + '</td><td>' + overview.success + '</td><td>' + overview.error + '</td><td>' + overview.total + '</td></tr>'
         }
 
         return result + '</table>';

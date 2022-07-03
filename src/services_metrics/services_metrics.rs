@@ -153,7 +153,7 @@ impl ServiesMetrics {
         }
 
         for event_metrics in result.values_mut() {
-            event_metrics.avg /= event_metrics.total as i64;
+            event_metrics.avg = event_metrics.avg / event_metrics.total as i64;
         }
 
         result
