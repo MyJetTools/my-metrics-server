@@ -28,7 +28,7 @@ var HtmlMain = /** @class */ (function () {
     };
     HtmlMain.generateMetrics = function (metrics) {
         var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
-        for (var _i = 0, _a = metrics.metrics.sort(function (a, b) { return b.started > a.started ? 1 : -1; }); _i < _a.length; _i++) {
+        for (var _i = 0, _a = metrics.metrics.sort(function (a, b) { return a.started > b.started ? 1 : -1; }); _i < _a.length; _i++) {
             var metric = _a[_i];
             var date = new Date(metric.started / 1000);
             var data = "";
@@ -38,7 +38,7 @@ var HtmlMain = /** @class */ (function () {
             if (metric.error) {
                 data = '<span style="color:red">' + metric.error + '</span>';
             }
-            result += '<tr><td>' + date.toLocaleString() + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>';
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>';
         }
         return result + '</table>';
     };
