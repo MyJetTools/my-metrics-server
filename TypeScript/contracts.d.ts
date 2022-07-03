@@ -35,4 +35,5 @@ interface IMetric {
     duration: number;
     success: String;
     error: String;
+    ip: String
 }

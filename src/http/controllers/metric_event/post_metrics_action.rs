@@ -39,6 +39,7 @@ async fn handle_request(
             metrics.process_id,
             metrics.success,
             metrics.fail,
+            metrics.ip,
         )
     }
 

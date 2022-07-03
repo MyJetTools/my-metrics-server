@@ -8,6 +8,7 @@ pub struct MetricEvent {
     pub event_data: String,
     pub success: Option<String>,
     pub fail: Option<String>,
+    pub ip: Option<String>,
 }
 
 impl MetricEvent {

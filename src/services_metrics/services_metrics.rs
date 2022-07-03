@@ -42,6 +42,7 @@ impl ServiesMetrics {
         process_id: i64,
         success: Option<String>,
         fail: Option<String>,
+        ip: Option<String>,
     ) {
         if !self.metrics.contains_key(service_name.as_str()) {
             self.metrics.insert(service_name.clone(), BTreeMap::new());
@@ -61,6 +62,7 @@ impl ServiesMetrics {
                 event_data,
                 success,
                 fail,
+                ip,
             }
             .into(),
         );
