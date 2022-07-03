@@ -10,7 +10,7 @@ class HtmlMain {
 
         let result = '<table style="width:100%"><tr><td>';
         for (let service of services.services) {
-            result += '<button type="button" class="btn btn-light" style="width:200px">' + service.id + '[' + this.micros_to_string(service.avg) + ']</button>';
+            result += '<button type="button" class="btn btn-light" style="width:300px">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
 
         return result + '</td><td style="width:100%"></td></tr></table>';

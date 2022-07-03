@@ -9,7 +9,7 @@ var HtmlMain = /** @class */ (function () {
         var result = '<table style="width:100%"><tr><td>';
         for (var _i = 0, _a = services.services; _i < _a.length; _i++) {
             var service = _a[_i];
-            result += '<button type="button" class="btn btn-light" style="width:200px">' + service.id + '[' + this.micros_to_string(service.avg) + ']</button>';
+            result += '<button type="button" class="btn btn-light" style="width:300px">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
         return result + '</td><td style="width:100%"></td></tr></table>';
     };
