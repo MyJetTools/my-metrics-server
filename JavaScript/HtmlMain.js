@@ -42,6 +42,45 @@ var HtmlMain = /** @class */ (function () {
         }
         return result + '</table>';
     };
+    HtmlMain.generateMetricsWithDuration = function (metrics) {
+        if (metrics.metrics.length == 0) {
+            return "No Data";
+        }
+        var _a = this.getMaximumDuration(metrics), min = _a.min, max = _a.max;
+        var maxDuration = max - min;
+        var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
+        for (var _i = 0, _b = metrics.metrics.sort(function (a, b) { return a.started > b.started ? 1 : -1; }); _i < _b.length; _i++) {
+            var metric = _b[_i];
+            var date = new Date(metric.started / 1000);
+            var data = "";
+            if (metric.success) {
+                data = '<span style="color:green">' + metric.success + '</span>';
+            }
+            if (metric.error) {
+                data = '<span style="color:red">' + metric.error + '</span>';
+            }
+            var pad = metric.started - min / maxDuration * 100;
+            var width = metric.duration / maxDuration * 100;
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
+                + '<tr><td colspan="5"><span style="padding:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:20px; color: blue; background:blue;"></span></td></tr>';
+        }
+        return result + '</table>';
+    };
+    HtmlMain.getMaximumDuration = function (metrics) {
+        var min = metrics.metrics[0].started;
+        var max = metrics.metrics[0].started + metrics.metrics[0].duration;
+        for (var _i = 0, _a = metrics.metrics; _i < _a.length; _i++) {
+            var metric = _a[_i];
+            if (min > metric.started) {
+                min = metric.started;
+            }
+            var ended = metric.started + metric.duration;
+            if (max < ended) {
+                max = ended;
+            }
+            return { min: min, max: max };
+        }
+    };
     HtmlMain.micros_to_string = function (micros) {
         if (micros < 1000) {
             return micros + 'micros';

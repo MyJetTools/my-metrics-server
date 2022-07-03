@@ -59,6 +59,62 @@ class HtmlMain {
     }
 
 
+    public static generateMetricsWithDuration(metrics: IMetrics): string {
+        if (metrics.metrics.length == 0) {
+            return "No Data";
+        }
+
+        let { min, max } = this.getMaximumDuration(metrics);
+
+        let maxDuration = max - min;
+
+
+
+        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
+        for (let metric of metrics.metrics.sort((a, b) => a.started > b.started ? 1 : -1)) {
+
+            let date = new Date(metric.started / 1000);
+
+            let data = "";
+
+            if (metric.success) {
+                data = '<span style="color:green">' + metric.success + '</span>';
+            }
+
+            if (metric.error) {
+                data = '<span style="color:red">' + metric.error + '</span>';
+            }
+
+            let pad = metric.started - min / maxDuration * 100;
+
+            let width = metric.duration / maxDuration * 100;
+
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
+                + '<tr><td colspan="5"><span style="padding:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:20px; color: blue; background:blue;"></span></td></tr>';
+        }
+
+        return result + '</table>';
+    }
+
+    static getMaximumDuration(metrics: IMetrics): { min: number, max: number } {
+        let min = metrics.metrics[0].started;
+        let max = metrics.metrics[0].started + metrics.metrics[0].duration;
+        for (let metric of metrics.metrics) {
+            if (min > metric.started) {
+                min = metric.started;
+            }
+
+            let ended = metric.started + metric.duration;
+
+            if (max < ended) {
+                max = ended;
+            }
+
+            return { min, max };
+        }
+    }
+
+
 
     static micros_to_string(micros: number): string {
         if (micros < 1000) {
