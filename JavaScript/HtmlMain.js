@@ -27,7 +27,7 @@ var HtmlMain = /** @class */ (function () {
         return result + '</table>';
     };
     HtmlMain.generateMetrics = function (id, data, metrics) {
-        var result = '<h3>' + id + '/' + data + ' < /h3><table class="table table-striped" style="font-size:10px"><tr><th>Started</th > <th>Duration < /th><th>Message</th > </tr>';
+        var result = '<h4>' + id + '/' + data + ' </h4><table class="table table-striped" style="font-size:10px"><tr><th>Started</th > <th>Duration < /th><th>Message</th > </tr>';
         for (var _i = 0, _a = metrics.metrics.sort(function (a, b) { return b.started > a.started ? 1 : -1; }); _i < _a.length; _i++) {
             var metric = _a[_i];
             var date = new Date(metric.started / 1000);
