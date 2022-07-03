@@ -66,8 +66,11 @@ class HtmlMain {
 
         let { min, max } = this.getMaximumDuration(metrics);
 
-        let maxDuration = max - min;
+        console.log("Min:" + min);
+        console.log("Max:" + max);
 
+        let maxDuration = max - min;
+        console.log("MaxDur:" + maxDuration);
 
 
         let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
@@ -85,14 +88,18 @@ class HtmlMain {
                 data = '<span style="color:red">' + metric.error + '</span>';
             }
 
-            let pad = metric.started - min / maxDuration * 100;
+            let pad = (metric.started - min) / maxDuration * 100;
+
+            console.log("Pad:" + pad);
 
             let width = metric.duration / maxDuration * 100;
+
+            console.log("Wid:" + width);
 
             let delayed = metric.started - min;
 
             result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
-                + '<tr><td colspan="5"><span style="padding:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:20px; color: blue; background:blue;"></span></td></tr>';
+                + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:20px; color: blue; background:blue;"></span></td></tr>';
 
             if (delayed > 0) {
                 result += '<tr><td colspan="5">Delayed: ' + this.micros_to_string(delayed) + '</td></tr>';
