@@ -56,6 +56,7 @@ impl ServiesMetrics {
 
         metrics_by_app.get_mut(&process_id).unwrap().push(
             MetricEvent {
+                id: process_id,
                 started: DateTimeAsMicroseconds::new(started),
                 finished: DateTimeAsMicroseconds::new(finished),
                 service_name,
@@ -102,6 +103,20 @@ impl ServiesMetrics {
                     if event.event_data == resource_data {
                         result.push(event.clone());
                     }
+                }
+            }
+        }
+
+        result
+    }
+
+    pub fn get_by_process_id(&self, process_id: i64) -> Vec<Arc<MetricEvent>> {
+        let mut result = Vec::new();
+
+        for (_, services) in &self.metrics {
+            if let Some(events_by_process) = services.get(&process_id) {
+                for event in events_by_process {
+                    result.push(event.clone());
                 }
             }
         }

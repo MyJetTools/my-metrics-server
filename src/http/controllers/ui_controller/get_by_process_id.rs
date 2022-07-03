@@ -8,31 +8,31 @@ use super::models::*;
 
 #[my_http_server_swagger::http_route(
     method: "GET",
-    route: "/ui/GetByServiceData",
+    route: "/ui/GetByProcessId",
     controller: "ui",
-    description: "Get Service Metrics Overview",
-    input_data: "GetByServiceDataRequest",
+    description: "Get by process id",
+    input_data: "GetByProcessIdRequest",
     result:[
-        {status_code: 200, description: "List of apps", model="GetServiceOverviewResponse"},
+        {status_code: 200, description: "List of apps", model="MetricsResponse"},
     ]
 )]
-pub struct GetByServiceDataAction {
+pub struct GetByProcessIdAction {
     app: Arc<AppContext>,
 }
 
-impl GetByServiceDataAction {
+impl GetByProcessIdAction {
     pub fn new(app: Arc<AppContext>) -> Self {
         Self { app }
     }
 }
 async fn handle_request(
-    action: &GetByServiceDataAction,
-    input_data: GetByServiceDataRequest,
+    action: &GetByProcessIdAction,
+    http_input: GetByProcessIdRequest,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
     let events = {
         let read_access = action.app.metrics.lock().await;
-        read_access.get_metrics_by_resource(&input_data.id, &input_data.data)
+        read_access.get_by_process_id(http_input.process_id)
     };
 
     let mut metrics = Vec::new();

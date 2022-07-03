@@ -74,4 +74,28 @@ class AppSelector {
             })
 
     }
+
+    public static showByProcessId(el: HTMLElement) {
+        if (this.requested) {
+            return;
+        }
+
+        this.requested = true;
+
+        let processId = el.getAttribute('data-process-id');
+
+
+
+        $.ajax({ url: '/ui/GetByProcessId?processId=' + processId, type: 'get', })
+            .then((result: IMetrics) => {
+                this.requested = false;
+                Dialog.override(processId, HtmlMain.generateMetrics(result))
+                HtmlStatusBar.updateOnline();
+
+            }).fail(() => {
+                this.requested = false;
+                HtmlStatusBar.updateOffline();
+            })
+
+    }
 }

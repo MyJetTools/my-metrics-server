@@ -20,6 +20,10 @@ pub fn build_controllers(app: &Arc<AppContext>) -> ControllersMiddleware {
     ));
 
     result.register_get_action(Arc::new(
+        super::controllers::ui_controller::GetByProcessIdAction::new(app.clone()),
+    ));
+
+    result.register_get_action(Arc::new(
         super::controllers::ui_controller::GetByServiceDataAction::new(app.clone()),
     ));
 

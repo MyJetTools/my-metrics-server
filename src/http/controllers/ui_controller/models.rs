@@ -50,10 +50,18 @@ pub struct MetricsResponse {
 
 #[derive(Deserialize, Serialize)]
 pub struct MetricHttpModel {
+    pub id: i64,
     pub started: i64,
     pub duration: i64,
 
     pub success: Option<String>,
     pub error: Option<String>,
     pub ip: Option<String>,
+}
+
+////////
+#[derive(Debug, MyHttpInput)]
+pub struct GetByProcessIdRequest {
+    #[http_query(name: "processId"; description = "Id of service")]
+    pub process_id: i64,
 }

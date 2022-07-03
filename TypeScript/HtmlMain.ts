@@ -36,7 +36,7 @@ class HtmlMain {
 
     public static generateMetrics(metrics: IMetrics): string {
 
-        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
+        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
         for (let metric of metrics.metrics.sort((a, b) => b.started > a.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);
@@ -52,7 +52,7 @@ class HtmlMain {
             }
 
 
-            result += '<tr><td>' + date.toLocaleString() + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
+            result += '<tr><td>' + date.toLocaleString() + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
         }
 
         return result + '</table>';

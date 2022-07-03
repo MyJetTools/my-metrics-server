@@ -31,6 +31,7 @@ interface IMetrics {
 }
 
 interface IMetric {
+    id: number;
     started: number;
     duration: number;
     success: String;

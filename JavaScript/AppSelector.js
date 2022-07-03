@@ -49,6 +49,23 @@ var AppSelector = /** @class */ (function () {
             HtmlStatusBar.updateOffline();
         });
     };
+    AppSelector.showByProcessId = function (el) {
+        var _this = this;
+        if (this.requested) {
+            return;
+        }
+        this.requested = true;
+        var processId = el.getAttribute('data-process-id');
+        $.ajax({ url: '/ui/GetByProcessId?processId=' + processId, type: 'get', })
+            .then(function (result) {
+            _this.requested = false;
+            Dialog.override(processId, HtmlMain.generateMetrics(result));
+            HtmlStatusBar.updateOnline();
+        }).fail(function () {
+            _this.requested = false;
+            HtmlStatusBar.updateOffline();
+        });
+    };
     AppSelector.requested = false;
     return AppSelector;
 }());
