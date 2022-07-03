@@ -8,3 +8,9 @@ pub struct MetricEvent {
     pub success: Option<String>,
     pub fail: Option<String>,
 }
+
+impl MetricEvent {
+    pub fn duration_mcs(&self) -> i64 {
+        self.finished.unix_microseconds - self.started.unix_microseconds
+    }
+}

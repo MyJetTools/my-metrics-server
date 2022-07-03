@@ -1,4 +1,9 @@
 interface IServicesList {
-    names: String[];
+    services: IService[];
 }
 
+
+interface IService {
+    id: String,
+    avg: number
+}

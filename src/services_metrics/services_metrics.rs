@@ -4,6 +4,11 @@ use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use super::MetricEvent;
 
+pub struct ServiceDomainModel {
+    pub id: String,
+    pub avg: i64,
+}
+
 pub struct ServiesMetrics {
     pub metrics: BTreeMap<String, BTreeMap<i64, Vec<MetricEvent>>>,
 }
@@ -58,7 +63,29 @@ impl ServiesMetrics {
         }
     }
 
-    pub fn get_services(&self) -> Vec<String> {
-        self.metrics.keys().cloned().collect()
+    pub fn get_services(&self) -> Vec<ServiceDomainModel> {
+        let mut result = Vec::with_capacity(self.metrics.len());
+        for (id, services) in &self.metrics {
+            result.push(ServiceDomainModel {
+                id: id.clone(),
+                avg: get_avg_duration(services),
+            });
+        }
+
+        result
     }
+}
+
+fn get_avg_duration(src: &BTreeMap<i64, Vec<MetricEvent>>) -> i64 {
+    let mut sum = 0;
+    let mut amount = 0;
+
+    for events in src.values() {
+        for event in events {
+            sum += event.duration_mcs();
+            amount += 1;
+        }
+    }
+
+    sum / amount
 }
