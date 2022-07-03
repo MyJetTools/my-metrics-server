@@ -34,9 +34,9 @@ class HtmlMain {
     }
 
 
-    public static generateMetrics(metrics: IMetrics): string {
+    public static generateMetrics(id: string, data: string, metrics: IMetrics): string {
 
-        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th></tr>';
+        let result = '<h3>' + id + '/' + data + ' < /h3><table class="table table-striped" style="font-size:10px"><tr><th>Started</th > <th>Duration < /th><th>Message</th > </tr>';
         for (let metric of metrics.metrics.sort((a, b) => b.started > a.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);

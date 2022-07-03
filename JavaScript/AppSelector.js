@@ -42,7 +42,7 @@ var AppSelector = /** @class */ (function () {
         $.ajax({ url: '/ui/GetByServiceData?' + str, type: 'get', })
             .then(function (result) {
             _this.requested = false;
-            Dialog.show(HtmlMain.generateMetrics(result));
+            Dialog.show(HtmlMain.generateMetrics(request.id, request.data, result));
             HtmlStatusBar.updateOnline();
         }).fail(function () {
             _this.requested = false;
