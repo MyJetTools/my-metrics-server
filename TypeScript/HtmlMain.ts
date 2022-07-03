@@ -99,7 +99,7 @@ class HtmlMain {
             let delayed = metric.started - min;
 
             result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
-                + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:20px; color: blue; background:blue;"></span></td></tr>';
+                + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
 
             if (delayed > 0) {
                 result += '<tr><td colspan="5">Delayed: ' + this.micros_to_string(delayed) + '</td></tr>';
@@ -113,6 +113,7 @@ class HtmlMain {
     static getMaximumDuration(metrics: IMetrics): { min: number, max: number } {
         let min = metrics.metrics[0].started;
         let max = metrics.metrics[0].started + metrics.metrics[0].duration;
+
         for (let metric of metrics.metrics) {
             if (min > metric.started) {
                 min = metric.started;
@@ -124,8 +125,9 @@ class HtmlMain {
                 max = ended;
             }
 
-            return { min, max };
         }
+
+        return { min, max };
     }
 
 
