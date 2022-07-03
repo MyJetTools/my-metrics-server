@@ -29,7 +29,7 @@ impl GetAction for IndexAction {
 
     async fn handle_request(&self, _: &mut HttpContext) -> Result<HttpOkResult, HttpFailResult> {
         let content = format!(
-            r###"<html><head><title>{} Services Status</title>
+            r###"<html><head><title>{} Telemetry</title>
             <link rel="icon" type="image/png" href="/img/favicon.png" />
             <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
             <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
