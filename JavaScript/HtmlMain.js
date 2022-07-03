@@ -26,19 +26,19 @@ var HtmlMain = /** @class */ (function () {
         }
         return result + '</table>';
     };
-    HtmlMain.generateMetrics = function (id, data, metrics) {
-        var result = '<h4>' + id + '/' + data + ' </h4><table class="table table-striped" style="font-size:10px"><tr><th>Started</th > <th>Duration < /th><th>Message</th > </tr>';
+    HtmlMain.generateMetrics = function (metrics) {
+        var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th > <th>Duration < /th><th>Message</th > </tr>';
         for (var _i = 0, _a = metrics.metrics.sort(function (a, b) { return b.started > a.started ? 1 : -1; }); _i < _a.length; _i++) {
             var metric = _a[_i];
             var date = new Date(metric.started / 1000);
-            var data_1 = "";
+            var data = "";
             if (metric.success) {
-                data_1 = '<span style="color:green">' + metric.success + '</span>';
+                data = '<span style="color:green">' + metric.success + '</span>';
             }
             if (metric.error) {
-                data_1 = '<span style="color:red">' + metric.error + '</span>';
+                data = '<span style="color:red">' + metric.error + '</span>';
             }
-            result += '<tr><td>' + date.toLocaleString() + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data_1 + '</td></tr>';
+            result += '<tr><td>' + date.toLocaleString() + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td></tr>';
         }
         return result + '</table>';
     };

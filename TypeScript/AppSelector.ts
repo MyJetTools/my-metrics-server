@@ -65,7 +65,7 @@ class AppSelector {
         $.ajax({ url: '/ui/GetByServiceData?' + str, type: 'get', })
             .then((result: IMetrics) => {
                 this.requested = false;
-                Dialog.show(HtmlMain.generateMetrics(request.id, request.data, result))
+                Dialog.show(request.id + '/' + request.data, HtmlMain.generateMetrics(result))
                 HtmlStatusBar.updateOnline();
 
             }).fail(() => {
