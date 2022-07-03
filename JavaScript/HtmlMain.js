@@ -15,7 +15,7 @@ var HtmlMain = /** @class */ (function () {
     };
     HtmlMain.micros_to_string = function (micros) {
         if (micros < 1000) {
-            return micros + 'μs';
+            return micros + 'micros';
         }
         if (micros < 1000000) {
             return (micros / 1000) + 'ms';

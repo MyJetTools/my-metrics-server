@@ -19,7 +19,7 @@ class HtmlMain {
 
     static micros_to_string(micros: number): string {
         if (micros < 1000) {
-            return micros + 'μs';
+            return micros + 'micros';
         }
 
         if (micros < 1000000) {
