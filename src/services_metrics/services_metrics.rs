@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
@@ -7,6 +7,16 @@ use super::MetricEvent;
 pub struct ServiceDomainModel {
     pub id: String,
     pub avg: i64,
+}
+
+pub struct ServiceOverviewDomainModel {
+    pub data: String,
+    pub min: i64,
+    pub max: i64,
+    pub avg: i64,
+    pub success: usize,
+    pub error: usize,
+    pub total: usize,
 }
 
 pub struct ServiesMetrics {
@@ -74,6 +84,80 @@ impl ServiesMetrics {
 
         result
     }
+
+    pub fn get_service_overview(
+        &self,
+        service_id: &str,
+    ) -> HashMap<String, ServiceOverviewDomainModel> {
+        let mut result = HashMap::new();
+
+        if let Some(service) = self.metrics.get(service_id) {
+            for (_, events) in service {
+                for event in events {
+                    if !result.contains_key(&event.event_data) {
+                        let duration = event.get_duration_mcs();
+
+                        let mut success = 0;
+
+                        if event.is_success() {
+                            success = 1;
+                        }
+
+                        let mut fail = 0;
+
+                        if event.is_fail() {
+                            fail = 1;
+                        }
+
+                        result.insert(
+                            event.event_data.to_string(),
+                            ServiceOverviewDomainModel {
+                                data: event.event_data.to_string(),
+                                min: duration,
+                                max: duration,
+                                avg: duration,
+                                success: success,
+                                error: fail,
+                                total: 1,
+                            },
+                        );
+                    } else {
+                        if let Some(event_metric) = result.get_mut(&event.event_data) {
+                            let duration = event.get_duration_mcs();
+
+                            if duration < event_metric.min {
+                                event_metric.min = duration;
+                            }
+
+                            if duration > event_metric.max {
+                                event_metric.max = duration;
+                            }
+
+                            if duration > event_metric.max {
+                                event_metric.avg += duration;
+                            }
+
+                            if event.is_success() {
+                                event_metric.success += 1;
+                            }
+
+                            if event.is_fail() {
+                                event_metric.error += 1;
+                            }
+
+                            event_metric.total += 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        for event_metrics in result.values_mut() {
+            event_metrics.avg /= event_metrics.total as i64;
+        }
+
+        result
+    }
 }
 
 fn get_avg_duration(src: &BTreeMap<i64, Vec<MetricEvent>>) -> i64 {
@@ -82,7 +166,7 @@ fn get_avg_duration(src: &BTreeMap<i64, Vec<MetricEvent>>) -> i64 {
 
     for events in src.values() {
         for event in events {
-            sum += event.duration_mcs();
+            sum += event.get_duration_mcs();
             amount += 1;
         }
     }

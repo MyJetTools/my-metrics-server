@@ -10,7 +10,7 @@ use super::models::*;
     method: "GET",
     route: "/ui/GetServices",
     controller: "ui",
-    description: "New Metric Event",
+    description: "Get servics overview",
     result:[
         {status_code: 200, description: "List of apps", model="GetServicesResponse"},
     ]

@@ -1,3 +1,4 @@
+use my_http_server_swagger::MyHttpInput;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
@@ -9,4 +10,25 @@ pub struct GetServicesResponse {
 pub struct ServiceModel {
     pub id: String,
     pub avg: i64,
+}
+
+#[derive(Debug, MyHttpInput)]
+pub struct GetServiceMetricsOverview {
+    #[http_query(description = "Id of service")]
+    pub id: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct GetServiceOverviewResponse {
+    pub data: Vec<ServiceOverviewContract>,
+}
+#[derive(Deserialize, Serialize)]
+pub struct ServiceOverviewContract {
+    pub data: String,
+    pub min: i64,
+    pub max: i64,
+    pub avg: i64,
+    pub success: usize,
+    pub error: usize,
+    pub total: usize,
 }

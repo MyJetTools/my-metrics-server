@@ -16,6 +16,10 @@ pub fn build_controllers(app: &Arc<AppContext>) -> ControllersMiddleware {
     ));
 
     result.register_get_action(Arc::new(
+        super::controllers::ui_controller::GetServiceMetricsOvervewAction::new(app.clone()),
+    ));
+
+    result.register_get_action(Arc::new(
         super::controllers::home_controller::IndexAction::new(app.clone()),
     ));
 

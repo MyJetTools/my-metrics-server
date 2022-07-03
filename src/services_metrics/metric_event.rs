@@ -10,7 +10,15 @@ pub struct MetricEvent {
 }
 
 impl MetricEvent {
-    pub fn duration_mcs(&self) -> i64 {
+    pub fn get_duration_mcs(&self) -> i64 {
         self.finished.unix_microseconds - self.started.unix_microseconds
+    }
+
+    pub fn is_success(&self) -> bool {
+        self.success.is_some()
+    }
+
+    pub fn is_fail(&self) -> bool {
+        self.fail.is_some()
     }
 }

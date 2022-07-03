@@ -9,9 +9,21 @@ var HtmlMain = /** @class */ (function () {
         var result = '<table style="width:100%"><tr><td>';
         for (var _i = 0, _a = services.services; _i < _a.length; _i++) {
             var service = _a[_i];
-            result += '<button type="button" class="btn btn-light" style="width:300px">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
+            result += '<button id="app-' + service.id + '" service="' + service.id + '" type="button" class="btn btn-light" style="width:300px" onclick="AppSelector.serviceSelected(this)">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
-        return result + '</td><td style="width:100%"></td></tr></table>';
+        return result + '</td><td id="service-overview" style="width:100%"></td></tr></table>';
+    };
+    HtmlMain.generateServiceOverview = function (overviews) {
+        var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Data</th><th>Max</th><th>Min</th><th>Avg</th><th>Success</th><th>Errors</th><th>Total</th></tr>';
+        for (var _i = 0, _a = overviews.data; _i < _a.length; _i++) {
+            var overview = _a[_i];
+            var errors = overview.error.toFixed(0);
+            if (overview.error > 0) {
+                errors = '<span style="color:red">' + errors + '</span>';
+            }
+            result += '<tr><td>' + overview.data + '</td><td>' + overview.max + '</td><td>' + overview.min + '</td><td>' + overview.avg + '</td><td>' + overview.success + '</td><td>' + overview.error + '</td><td>' + overview.total + '</td></tr>';
+        }
+        return result + '</table>';
     };
     HtmlMain.micros_to_string = function (micros) {
         if (micros < 1000) {

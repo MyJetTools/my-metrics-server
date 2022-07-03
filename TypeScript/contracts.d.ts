@@ -7,3 +7,18 @@ interface IService {
     id: String,
     avg: number
 }
+
+
+interface IServiceOverviewList {
+    data: IServiceOverview[];
+}
+
+interface IServiceOverview {
+    data: String,
+    min: number,
+    max: number,
+    avg: number,
+    success: number,
+    error: number,
+    total: number,
+}
