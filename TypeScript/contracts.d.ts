@@ -1,3 +1,5 @@
+
+
 interface IServicesList {
     services: IService[];
 }
@@ -14,11 +16,23 @@ interface IServiceOverviewList {
 }
 
 interface IServiceOverview {
-    data: String,
-    min: number,
-    max: number,
-    avg: number,
-    success: number,
-    error: number,
-    total: number,
+    data: String;
+    min: number;
+    max: number;
+    avg: number;
+    success: number;
+    error: number;
+    total: number;
+}
+
+
+interface IMetrics {
+    metrics: IMetric[];
+}
+
+interface IMetric {
+    started: number;
+    duration: number;
+    success: String;
+    error: String;
 }

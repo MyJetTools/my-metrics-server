@@ -11,6 +11,7 @@ pub struct ServiceModel {
     pub id: String,
     pub avg: i64,
 }
+/////////
 
 #[derive(Debug, MyHttpInput)]
 pub struct GetServiceMetricsOverview {
@@ -31,4 +32,27 @@ pub struct ServiceOverviewContract {
     pub success: usize,
     pub error: usize,
     pub total: usize,
+}
+
+////////////
+
+#[derive(Debug, MyHttpInput)]
+pub struct GetByServiceDataRequest {
+    #[http_query(description = "Id of service")]
+    pub id: String,
+    #[http_query(description = "Id of service")]
+    pub data: String,
+}
+#[derive(Deserialize, Serialize)]
+pub struct MetricsResponse {
+    pub metrics: Vec<MetricHttpModel>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct MetricHttpModel {
+    pub started: i64,
+    pub duration: i64,
+
+    pub success: Option<String>,
+    pub error: Option<String>,
 }

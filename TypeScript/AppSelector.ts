@@ -34,9 +34,38 @@ class AppSelector {
                 this.requested = false;
                 let el = document.getElementById('service-overview');
 
-                el.innerHTML = HtmlMain.generateServiceOverview(result);
+                el.innerHTML = HtmlMain.generateServiceOverview(appId, result);
 
 
+                HtmlStatusBar.updateOnline();
+
+            }).fail(() => {
+                this.requested = false;
+                HtmlStatusBar.updateOffline();
+            })
+
+    }
+
+
+    public static expandMetrics(el: HTMLElement) {
+        if (this.requested) {
+            return;
+        }
+
+        this.requested = true;
+
+        let request = {
+            id: el.getAttribute('data-app'),
+            data: el.getAttribute('data-app-data'),
+        }
+
+        var str = jQuery.param(request);
+
+
+        $.ajax({ url: '/ui/GetByServiceData?' + str, type: 'get', })
+            .then((result: IMetrics) => {
+                this.requested = false;
+                Dialog.show(HtmlMain.generateMetrics(result))
                 HtmlStatusBar.updateOnline();
 
             }).fail(() => {

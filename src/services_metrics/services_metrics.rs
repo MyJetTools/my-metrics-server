@@ -1,4 +1,7 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
@@ -20,7 +23,7 @@ pub struct ServiceOverviewDomainModel {
 }
 
 pub struct ServiesMetrics {
-    pub metrics: BTreeMap<String, BTreeMap<i64, Vec<MetricEvent>>>,
+    pub metrics: BTreeMap<String, BTreeMap<i64, Vec<Arc<MetricEvent>>>>,
 }
 
 impl ServiesMetrics {
@@ -50,17 +53,17 @@ impl ServiesMetrics {
             metrics_by_app.insert(process_id, Vec::new());
         }
 
-        metrics_by_app
-            .get_mut(&process_id)
-            .unwrap()
-            .push(MetricEvent {
+        metrics_by_app.get_mut(&process_id).unwrap().push(
+            MetricEvent {
                 started: DateTimeAsMicroseconds::new(started),
                 finished: DateTimeAsMicroseconds::new(finished),
                 service_name,
                 event_data,
                 success,
                 fail,
-            });
+            }
+            .into(),
+        );
     }
 
     pub fn gc(&mut self) {
@@ -80,6 +83,25 @@ impl ServiesMetrics {
                 id: id.clone(),
                 avg: get_avg_duration(services),
             });
+        }
+
+        result
+    }
+
+    pub fn get_metrics_by_resource(
+        &self,
+        service_id: &str,
+        resource_data: &str,
+    ) -> Vec<Arc<MetricEvent>> {
+        let mut result = Vec::new();
+        if let Some(service) = self.metrics.get(service_id) {
+            for (_, events) in service {
+                for event in events {
+                    if event.event_data == resource_data {
+                        result.push(event.clone());
+                    }
+                }
+            }
         }
 
         result
@@ -160,7 +182,7 @@ impl ServiesMetrics {
     }
 }
 
-fn get_avg_duration(src: &BTreeMap<i64, Vec<MetricEvent>>) -> i64 {
+fn get_avg_duration(src: &BTreeMap<i64, Vec<Arc<MetricEvent>>>) -> i64 {
     let mut sum = 0;
     let mut amount = 0;
 

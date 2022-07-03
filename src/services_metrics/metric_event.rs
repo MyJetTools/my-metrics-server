@@ -1,5 +1,6 @@
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
+#[derive(Debug, Clone)]
 pub struct MetricEvent {
     pub started: DateTimeAsMicroseconds,
     pub finished: DateTimeAsMicroseconds,
