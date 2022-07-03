@@ -55,4 +55,5 @@ pub struct MetricHttpModel {
 
     pub success: Option<String>,
     pub error: Option<String>,
+    pub ip: Option<String>,
 }

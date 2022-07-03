@@ -43,6 +43,7 @@ async fn handle_request(
             duration: event.get_duration_mcs(),
             success: event.success.clone(),
             error: event.fail.clone(),
+            ip: event.ip.clone(),
         });
     }
 
