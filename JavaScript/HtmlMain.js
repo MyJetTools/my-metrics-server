@@ -7,7 +7,7 @@ var HtmlMain = /** @class */ (function () {
     };
     HtmlMain.generateServicesList = function (services) {
         var result = '<table style="width:100%; height:100%"><tr style="vertical-align: top;"><td>';
-        for (var _i = 0, _a = services.services; _i < _a.length; _i++) {
+        for (var _i = 0, _a = services.services.sort(function (a, b) { return b.avg > a.avg ? 1 : -1; }); _i < _a.length; _i++) {
             var service = _a[_i];
             result += '<button id="app-' + service.id + '" service="' + service.id + '" type="button" class="btn btn-light" style="width:300px" onclick="AppSelector.serviceSelected(this)">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
@@ -15,7 +15,7 @@ var HtmlMain = /** @class */ (function () {
     };
     HtmlMain.generateServiceOverview = function (appId, overviews) {
         var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Data</th><th>Max</th><th>Min</th><th>Avg</th><th>Success</th><th>Errors</th><th>Total</th><th></th></tr>';
-        for (var _i = 0, _a = overviews.data; _i < _a.length; _i++) {
+        for (var _i = 0, _a = overviews.data.sort(function (a, b) { return b.avg > a.avg ? 1 : -1; }); _i < _a.length; _i++) {
             var overview = _a[_i];
             var errors = overview.error.toFixed(0);
             if (overview.error > 0) {

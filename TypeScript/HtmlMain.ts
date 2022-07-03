@@ -9,7 +9,7 @@ class HtmlMain {
     public static generateServicesList(services: IServicesList): string {
 
         let result = '<table style="width:100%; height:100%"><tr style="vertical-align: top;"><td>';
-        for (let service of services.services) {
+        for (let service of services.services.sort((a, b) => b.avg > a.avg ? 1 : -1)) {
             result += '<button id="app-' + service.id + '" service="' + service.id + '" type="button" class="btn btn-light" style="width:300px" onclick="AppSelector.serviceSelected(this)">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
 
@@ -20,7 +20,7 @@ class HtmlMain {
     public static generateServiceOverview(appId: string, overviews: IServiceOverviewList): string {
 
         let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Data</th><th>Max</th><th>Min</th><th>Avg</th><th>Success</th><th>Errors</th><th>Total</th><th></th></tr>';
-        for (let overview of overviews.data) {
+        for (let overview of overviews.data.sort((a, b) => b.avg > a.avg ? 1 : -1)) {
             let errors = overview.error.toFixed(0);
 
             if (overview.error > 0) {
