@@ -73,7 +73,7 @@ class HtmlMain {
         console.log("MaxDur:" + maxDuration);
 
 
-        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
+        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Delayed</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
         for (let metric of metrics.metrics.sort((a, b) => a.started > b.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);
@@ -98,13 +98,17 @@ class HtmlMain {
 
             let delayed = metric.started - min;
 
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
-                + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
+            let delayedStr = "";
 
             if (delayed > 0) {
-                result += '<tr><td colspan="5">Delayed: ' + this.micros_to_string(delayed) + '</td></tr>';
-
+                delayedStr = this.micros_to_string(delayed);
             }
+
+
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + metric.data + '</td><td>' + delayedStr + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
+                + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
+
+
         }
 
         return result + '</table>';
