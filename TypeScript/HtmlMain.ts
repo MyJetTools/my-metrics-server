@@ -73,8 +73,9 @@ class HtmlMain {
         console.log("MaxDur:" + maxDuration);
 
 
-        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Delayed</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
+        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Delayed</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th><th>Delivery</br>Delay</th></tr>';
         let prevStarted: number;
+        let prevEnded: number;
         for (let metric of metrics.metrics.sort((a, b) => a.started > b.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);
@@ -113,10 +114,16 @@ class HtmlMain {
 
             }
 
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
-                + '<tr><td colspan="6"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
+            let prevDeliveryDelayStr = "";
+            if (prevEnded) {
+                prevDeliveryDelayStr = '<div>' + this.micros_to_string(prevEnded - (metric.started + metric.duration)) + '</div>';
+            }
+
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td>' + prevDeliveryDelayStr + '</td></tr>'
+                + '<tr><td colspan="7"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
 
             prevStarted = metric.started;
+            prevEnded = metric.started + metric.duration;
         }
 
         return result + '</table>';
