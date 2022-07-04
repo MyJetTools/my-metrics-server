@@ -51,7 +51,7 @@ var HtmlMain = /** @class */ (function () {
         console.log("Max:" + max);
         var maxDuration = max - min;
         console.log("MaxDur:" + maxDuration);
-        var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
+        var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
         for (var _i = 0, _b = metrics.metrics.sort(function (a, b) { return a.started > b.started ? 1 : -1; }); _i < _b.length; _i++) {
             var metric = _b[_i];
             var date = new Date(metric.started / 1000);
@@ -67,7 +67,7 @@ var HtmlMain = /** @class */ (function () {
             var width = metric.duration / maxDuration * 100;
             console.log("Wid:" + width);
             var delayed = metric.started - min;
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
                 + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
             if (delayed > 0) {
                 result += '<tr><td colspan="5">Delayed: ' + this.micros_to_string(delayed) + '</td></tr>';

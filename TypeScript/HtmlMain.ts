@@ -59,7 +59,7 @@ class HtmlMain {
     }
 
 
-    public static generateMetricsWithDuration(metrics: IMetrics): string {
+    public static generateMetricsWithDuration(metrics: IMetricsByProcessId): string {
         if (metrics.metrics.length == 0) {
             return "No Data";
         }
@@ -73,7 +73,7 @@ class HtmlMain {
         console.log("MaxDur:" + maxDuration);
 
 
-        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Duration</th><th>Message</th><th>Ip</th><th></th></tr>';
+        let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
         for (let metric of metrics.metrics.sort((a, b) => a.started > b.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);
@@ -98,7 +98,7 @@ class HtmlMain {
 
             let delayed = metric.started - min;
 
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td><button data-process-id="' + metric.id + '" class="btn btn-light btn-sm" onclick="AppSelector.showByProcessId(this)">Show</button></td></tr>'
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
                 + '<tr><td colspan="5"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
 
             if (delayed > 0) {
@@ -110,7 +110,7 @@ class HtmlMain {
         return result + '</table>';
     }
 
-    static getMaximumDuration(metrics: IMetrics): { min: number, max: number } {
+    static getMaximumDuration(metrics: IMetricsByProcessId): { min: number, max: number } {
         let min = metrics.metrics[0].started;
         let max = metrics.metrics[0].started + metrics.metrics[0].duration;
 

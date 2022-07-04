@@ -65,3 +65,19 @@ pub struct GetByProcessIdRequest {
     #[http_query(name: "processId"; description = "Id of service")]
     pub process_id: i64,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct MetricsByProcessResponse {
+    pub metrics: Vec<MetricByProcessModel>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct MetricByProcessModel {
+    pub data: String,
+    pub started: i64,
+    pub duration: i64,
+
+    pub success: Option<String>,
+    pub error: Option<String>,
+    pub ip: Option<String>,
+}

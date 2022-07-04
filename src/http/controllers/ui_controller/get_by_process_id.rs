@@ -13,7 +13,7 @@ use super::models::*;
     description: "Get by process id",
     input_data: "GetByProcessIdRequest",
     result:[
-        {status_code: 200, description: "List of apps", model="MetricsResponse"},
+        {status_code: 200, description: "List of apps", model="MetricsByProcessResponse"},
     ]
 )]
 pub struct GetByProcessIdAction {
@@ -38,8 +38,8 @@ async fn handle_request(
     let mut metrics = Vec::new();
 
     for event in events {
-        metrics.push(MetricHttpModel {
-            id: event.id,
+        metrics.push(MetricByProcessModel {
+            data: event.event_data.to_string(),
             started: event.started.unix_microseconds,
             duration: event.get_duration_mcs(),
             success: event.success.clone(),
@@ -48,7 +48,7 @@ async fn handle_request(
         });
     }
 
-    let result = MetricsResponse { metrics };
+    let result = MetricsByProcessResponse { metrics };
 
     return HttpOutput::as_json(result).into_ok_result(true).into();
 }

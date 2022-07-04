@@ -38,3 +38,16 @@ interface IMetric {
     error: String;
     ip: String
 }
+
+interface IMetricsByProcessId {
+    metrics: IMetricByProcessId[];
+}
+
+interface IMetricByProcessId {
+    data: string;
+    started: number;
+    duration: number;
+    success: String;
+    error: String;
+    ip: String
+}
