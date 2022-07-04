@@ -74,6 +74,7 @@ class HtmlMain {
 
 
         let result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Delayed</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
+        let prevStarted: number;
         for (let metric of metrics.metrics.sort((a, b) => a.started > b.started ? 1 : -1)) {
 
             let date = new Date(metric.started / 1000);
@@ -104,11 +105,18 @@ class HtmlMain {
                 delayedStr = this.micros_to_string(delayed);
             }
 
+            let prevDelayStr = "";
 
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
+            if (prevStarted) {
+                prevDelayStr = '<div>' + this.micros_to_string(metric.started - prevStarted) + '</div>';
+
+
+            }
+
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
                 + '<tr><td colspan="6"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
 
-
+            prevStarted = metric.started;
         }
 
         return result + '</table>';

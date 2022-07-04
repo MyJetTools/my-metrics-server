@@ -52,6 +52,7 @@ var HtmlMain = /** @class */ (function () {
         var maxDuration = max - min;
         console.log("MaxDur:" + maxDuration);
         var result = '<table class="table table-striped" style="font-size:10px"><tr><th>Started</th><th>Delayed</th><th>Name</th><th>Duration</th><th>Message</th><th>Ip</th></tr>';
+        var prevStarted;
         for (var _i = 0, _b = metrics.metrics.sort(function (a, b) { return a.started > b.started ? 1 : -1; }); _i < _b.length; _i++) {
             var metric = _b[_i];
             var date = new Date(metric.started / 1000);
@@ -71,8 +72,13 @@ var HtmlMain = /** @class */ (function () {
             if (delayed > 0) {
                 delayedStr = this.micros_to_string(delayed);
             }
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
+            var prevDelayStr = "";
+            if (prevStarted) {
+                prevDelayStr = '<div>' + this.micros_to_string(metric.started - prevStarted) + '</div>';
+            }
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td></tr>'
                 + '<tr><td colspan="6"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
+            prevStarted = metric.started;
         }
         return result + '</table>';
     };
