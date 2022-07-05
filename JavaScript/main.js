@@ -43,6 +43,7 @@ var main = /** @class */ (function () {
 var $;
 window.setTimeout(function () { return main.background(); }, 300);
 $(window).on('popstate', function (e) {
+    console.log(e);
     var state = e.originalEvent.state;
     var el = document.getElementById(state.div);
     el.innerHTML = state.content;

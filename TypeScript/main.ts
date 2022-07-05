@@ -81,6 +81,8 @@ let $: any;
 window.setTimeout(() => main.background(), 300);
 
 $(window).on('popstate', function (e) {
+
+    console.log(e);
     var state = e.originalEvent.state;
 
     let el = document.getElementById(state.div);
