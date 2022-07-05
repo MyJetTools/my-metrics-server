@@ -73,10 +73,10 @@ pub struct MetricsByProcessResponse {
 
 #[derive(Deserialize, Serialize)]
 pub struct MetricByProcessModel {
+    pub id: String,
     pub data: String,
     pub started: i64,
     pub duration: i64,
-
     pub success: Option<String>,
     pub error: Option<String>,
     pub ip: Option<String>,

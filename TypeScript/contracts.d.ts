@@ -44,6 +44,7 @@ interface IMetricsByProcessId {
 }
 
 interface IMetricByProcessId {
+    id: string;
     data: string;
     started: number;
     duration: number;
