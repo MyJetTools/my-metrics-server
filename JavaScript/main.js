@@ -42,9 +42,14 @@ var main = /** @class */ (function () {
 }());
 var $;
 window.setTimeout(function () { return main.background(); }, 300);
-$(window).on('popstate', function (e) {
+window.addEventListener('popstate', function (e) {
     console.log(e);
-    var state = e.originalEvent.state;
+    var state = e.state;
+    if (state.action == 'selectService') {
+        var el_1 = document.getElementById('app-' + state.id);
+        AppSelector.serviceSelected(el_1);
+        return;
+    }
     var el = document.getElementById(state.div);
     el.innerHTML = state.content;
 });

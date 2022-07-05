@@ -5,14 +5,13 @@ class AppSelector {
 
     private static requested = false;
 
-    public static serviceSelected(el: HTMLObjectElement) {
+    public static serviceSelected(el: HTMLElement) {
 
         if (this.requested) {
             return;
         }
 
         this.requested = true;
-
 
 
         if (this.selectedApp) {
@@ -22,6 +21,8 @@ class AppSelector {
         }
 
         let appId = el.getAttribute('service');
+
+        window.history.pushState({ action: 'selectService', id: appId, }, "Details", '#service-overview');
 
         let currentBtn = document.getElementById('app-' + appId);
         currentBtn.classList.remove('btn-light');

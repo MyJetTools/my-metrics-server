@@ -13,6 +13,7 @@ var AppSelector = /** @class */ (function () {
             prevBtn.classList.add('btn-light');
         }
         var appId = el.getAttribute('service');
+        window.history.pushState({ action: 'selectService', id: appId, }, "Details", '#service-overview');
         var currentBtn = document.getElementById('app-' + appId);
         currentBtn.classList.remove('btn-light');
         currentBtn.classList.add('btn-primary');

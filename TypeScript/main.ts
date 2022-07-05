@@ -80,10 +80,18 @@ let $: any;
 
 window.setTimeout(() => main.background(), 300);
 
-$(window).on('popstate', function (e) {
+
+window.addEventListener('popstate', function (e) {
+
 
     console.log(e);
-    var state = e.originalEvent.state;
+    var state = e.state;
+
+    if (state.action == 'selectService') {
+        let el = document.getElementById('app-' + state.id);
+        AppSelector.serviceSelected(el);
+        return;
+    }
 
     let el = document.getElementById(state.div);
 
