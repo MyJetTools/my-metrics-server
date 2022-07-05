@@ -39,7 +39,7 @@ async fn handle_request(
 
     for event in events {
         metrics.push(MetricByProcessModel {
-            id: event.id.to_string(),
+            id: event.service_name.clone(),
             data: event.event_data.to_string(),
             started: event.started.unix_microseconds,
             duration: event.get_duration_mcs(),

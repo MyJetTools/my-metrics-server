@@ -41,5 +41,10 @@ var main = /** @class */ (function () {
     return main;
 }());
 var $;
-window.setTimeout(function () { return main.background(); }, 1000);
+window.setTimeout(function () { return main.background(); }, 300);
+$(window).on('popstate', function (e) {
+    var state = e.originalEvent.state;
+    var el = document.getElementById(state.div);
+    el.innerHTML = state.content;
+});
 //# sourceMappingURL=main.js.map

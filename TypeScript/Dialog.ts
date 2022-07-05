@@ -5,20 +5,16 @@ class Dialog {
 
         let el = document.getElementById('service-overview');
 
-        this.prevHtml = el.innerHTML;
+
+        window.history.pushState({ div: 'service-overview', content: el.innerHTML }, "Details", '#service-overview');
 
         el.innerHTML = '<div><table><tr><td><button class="btn btn-light" onclick="Dialog.pressBack()">Back</button></td><td><h4>' + header + '</h4></td></table></div>' + html;
     }
 
-    public static override(header: string, html: string) {
 
-        let el = document.getElementById('service-overview');
-        el.innerHTML = '<div><table><tr><td><button class="btn btn-light" onclick="Dialog.pressBack()">Back</button></td><td><h4>' + header + '</h4></td></table></div>' + html;
-    }
 
     public static pressBack() {
-        let el = document.getElementById('service-overview');
-        el.innerHTML = this.prevHtml;
+        window.history.back()
     }
 
 }

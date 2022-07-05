@@ -89,7 +89,7 @@ class AppSelector {
         $.ajax({ url: '/ui/GetByProcessId?processId=' + processId, type: 'get', })
             .then((result: IMetricsByProcessId) => {
                 this.requested = false;
-                Dialog.override(processId, HtmlMain.generateMetricsWithDuration(result))
+                Dialog.show(processId, HtmlMain.generateMetricsWithDuration(result))
                 HtmlStatusBar.updateOnline();
 
             }).fail(() => {

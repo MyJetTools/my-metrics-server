@@ -78,4 +78,13 @@ class main {
 
 let $: any;
 
-window.setTimeout(() => main.background(), 1000);
+window.setTimeout(() => main.background(), 300);
+
+$(window).on('popstate', function (e) {
+    var state = e.originalEvent.state;
+
+    let el = document.getElementById(state.div);
+
+    el.innerHTML = state.content;
+
+});
