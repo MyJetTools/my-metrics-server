@@ -1,10 +1,8 @@
 class Dialog {
-    static prevHtml: string;
 
     public static show(header: string, html: string) {
 
         let el = document.getElementById('service-overview');
-
 
         window.history.pushState({ div: 'service-overview', content: el.innerHTML }, "Details", '#service-overview');
 

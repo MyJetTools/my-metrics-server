@@ -81,7 +81,7 @@ var HtmlMain = /** @class */ (function () {
             if (prevEnded) {
                 prevDeliveryDelayStr = '<div>' + this.micros_to_string(prevEnded - (metric.started + metric.duration)) + '</div>';
             }
-            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td><div><b>' + metric.id + '</b></div>' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td>' + data + '</td><td>' + metric.ip + '</td><td>' + prevDeliveryDelayStr + '</td></tr>'
+            result += '<tr><td><div>' + date.toLocaleString() + '</div><div>' + date.toISOString() + '</div></td><td>' + delayedStr + prevDelayStr + '</td><td><div><b>' + metric.id + '</b></div style="max-width:300px">' + metric.data + '</td><td>' + this.micros_to_string(metric.duration) + '</td><td style="max-width:300px">' + data + '</td><td>' + metric.ip + '</td><td>' + prevDeliveryDelayStr + '</td></tr>'
                 + '<tr><td colspan="7"><span style="display: inline-block;margin-left:' + pad.toFixed(2) + '%;width:' + width.toFixed(2) + '%;height:5px; color: blue; background:blue;"></span></td></tr>';
             prevStarted = metric.started;
             prevEnded = metric.started + metric.duration;
