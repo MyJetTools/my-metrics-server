@@ -1,10 +1,10 @@
 use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, MyHttpInput)]
+#[derive(MyHttpInput)]
 pub struct NewMetricsEvent {
-    #[http_body(description = "Metrics")]
-    pub metrics: Vec<NewMetric>,
+    #[http_body_raw(description = "Metrics")]
+    pub body: my_http_server::types::RawDataTyped<Vec<NewMetric>>,
 }
 
 #[derive(Serialize, Deserialize, MyHttpObjectStructure)]
