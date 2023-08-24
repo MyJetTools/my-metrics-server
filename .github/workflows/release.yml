@@ -28,8 +28,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
-          name: my-telemetry-artifact.txt
-          path: ./my-telemetry-artifact.txt
+          name: my-telemetry-artifact
+          path: my-telemetry-artifact.txt
           retention-days: 1
           if-no-files-found: error
 
