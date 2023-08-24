@@ -20,9 +20,9 @@ async fn main() {
 
     gc_timer.register_timer("GcTimer", Arc::new(GcMetricsTimer::new(app.clone())));
 
-    gc_timer.start(app.app_states.clone(), app.logger.clone());
+    gc_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
-    http_server.start(app.app_states.clone(), app.logger.clone());
+    http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
     app.app_states.wait_until_shutdown().await;
 }

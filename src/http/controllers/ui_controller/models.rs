@@ -1,12 +1,12 @@
-use my_http_server_swagger::MyHttpInput;
+use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServicesResponse {
     pub services: Vec<ServiceModel>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct ServiceModel {
     pub id: String,
     pub avg: i64,
@@ -19,11 +19,11 @@ pub struct GetServiceMetricsOverview {
     pub id: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServiceOverviewResponse {
     pub data: Vec<ServiceOverviewContract>,
 }
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct ServiceOverviewContract {
     pub data: String,
     pub min: i64,
@@ -43,12 +43,12 @@ pub struct GetByServiceDataRequest {
     #[http_query(description = "Id of service")]
     pub data: String,
 }
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricsResponse {
     pub metrics: Vec<MetricHttpModel>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricHttpModel {
     pub id: i64,
     pub started: i64,
@@ -66,12 +66,12 @@ pub struct GetByProcessIdRequest {
     pub process_id: i64,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricsByProcessResponse {
     pub metrics: Vec<MetricByProcessModel>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricByProcessModel {
     pub id: String,
     pub data: String,

@@ -11,6 +11,7 @@ use super::models::*;
     route: "/ui/GetServices",
     controller: "ui",
     description: "Get servics overview",
+    summary: "Get servics overview",
     result:[
         {status_code: 200, description: "List of apps", model="GetServicesResponse"},
     ]

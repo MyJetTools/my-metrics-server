@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, sync::Arc};
 
-use my_http_server::{middlewares::StaticFilesMiddleware, MyHttpServer};
+use my_http_server::{MyHttpServer, StaticFilesMiddleware};
 use my_http_server_controllers::swagger::SwaggerMiddleware;
 
 use crate::app_ctx::AppContext;
@@ -19,7 +19,7 @@ pub fn setup_server(app: &Arc<AppContext>, port: u16) -> MyHttpServer {
     http_server.add_middleware(Arc::new(swagger_middleware));
     http_server.add_middleware(controllers);
 
-    http_server.add_middleware(Arc::new(StaticFilesMiddleware::new(None)));
+    http_server.add_middleware(Arc::new(StaticFilesMiddleware::new(None, None)));
 
     http_server
 }

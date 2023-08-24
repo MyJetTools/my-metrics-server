@@ -11,6 +11,7 @@ use super::models::NewMetricsEvent;
     route: "/api/add",
     controller: "api",
     description: "New Metric Event",
+    summary: "New Metric Event",
     input_data: "NewMetricsEvent",
 
 )]

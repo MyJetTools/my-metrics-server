@@ -22,11 +22,11 @@ pub struct ServiceOverviewDomainModel {
     pub total: usize,
 }
 
-pub struct ServiesMetrics {
+pub struct ServicesMetrics {
     pub metrics: BTreeMap<String, BTreeMap<i64, Vec<Arc<MetricEvent>>>>,
 }
 
-impl ServiesMetrics {
+impl ServicesMetrics {
     pub fn new() -> Self {
         Self {
             metrics: BTreeMap::new(),

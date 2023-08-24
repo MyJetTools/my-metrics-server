@@ -11,6 +11,7 @@ use super::models::*;
     route: "/ui/GetByProcessId",
     controller: "ui",
     description: "Get by process id",
+    summary: "Get by process id",
     input_data: "GetByProcessIdRequest",
     result:[
         {status_code: 200, description: "List of apps", model="MetricsByProcessResponse"},

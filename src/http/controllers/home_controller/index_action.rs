@@ -1,12 +1,14 @@
 use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput, WebContentType};
-use my_http_server_controllers::controllers::{
-    actions::GetAction, documentation::HttpActionDescription,
-};
 
 use crate::app_ctx::AppContext;
 
+#[my_http_server_swagger::http_route(
+    method: "GET",
+    route: "/",
+
+)]
 pub struct IndexAction {
     pub app: Arc<AppContext>,
 }
@@ -17,35 +19,27 @@ impl IndexAction {
     }
 }
 
-#[async_trait::async_trait]
-impl GetAction for IndexAction {
-    fn get_route(&self) -> &str {
-        "/"
-    }
+async fn handle_request(
+    action: &IndexAction,
+    _ctx: &HttpContext,
+) -> Result<HttpOkResult, HttpFailResult> {
+    let content = format!(
+        r###"<html><head><title>{ver} Telemetry</title>
+        <link rel="icon" type="image/png" href="/img/favicon.png" />
+        <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
+        <link href="/css/site.css" rel="stylesheet" type="text/css" />
+        <script src="/js/jquery.js"></script><script src="/js/app.js?ver={rnd}"></script>
+        </head><body></body></html>"###,
+        ver = crate::app_ctx::APP_VERSION,
+        rnd = action.app.process_id
+    );
 
-    fn get_description(&self) -> Option<HttpActionDescription> {
-        None
+    HttpOutput::Content {
+        headers: None,
+        content_type: Some(WebContentType::Html),
+        content: content.into_bytes(),
     }
-
-    async fn handle_request(&self, _: &mut HttpContext) -> Result<HttpOkResult, HttpFailResult> {
-        let content = format!(
-            r###"<html><head><title>{} Telemetry</title>
-            <link rel="icon" type="image/png" href="/img/favicon.png" />
-            <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
-            <link href="/css/bootstrap.css" rel="stylesheet" type="text/css" />
-            <link href="/css/site.css" rel="stylesheet" type="text/css" />
-            <script src="/js/jquery.js"></script><script src="/js/app.js?ver={rnd}"></script>
-            </head><body></body></html>"###,
-            ver = crate::app_ctx::APP_VERSION,
-            rnd = self.app.process_id
-        );
-
-        HttpOutput::Content {
-            headers: None,
-            content_type: Some(WebContentType::Html),
-            content: content.into_bytes(),
-        }
-        .into_ok_result(true)
-        .into()
-    }
+    .into_ok_result(true)
+    .into()
 }
