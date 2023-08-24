@@ -45,6 +45,9 @@ jobs:
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a #v3.0.2
         with:
           name: my-telemetry-release-artifact-${{ github.run_id }}
+
+      - name: ls after
+        run: pwd && ls -la
       
       - name: Get the version
         id: get_version
