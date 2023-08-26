@@ -44,6 +44,9 @@ jobs:
         with:
           name: release-artifact-${{ github.run_id }}
           path: ./target/release/
+
+      - name: Restore Executable Flag 
+        run: chmod +x ./target/release/my-telemetry-server
       
       - name: Get the version
         id: get_version
