@@ -37,7 +37,7 @@ async fn main() {
         .start(app.app_states.clone(), my_logger::LOGGER.clone())
         .await;
 
-    app.app_states.wait_until_shutdown().await;
-
     http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
+
+    app.app_states.wait_until_shutdown().await;
 }
