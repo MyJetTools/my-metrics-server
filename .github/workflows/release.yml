@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -22,35 +22,11 @@ jobs:
 
       - name: Updating version
         run: sed -i -e 's/^version = .*/version = "${{ steps.get_version.outputs.VERSION }}"/' Cargo.toml
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1      
               
       - run: cargo build --release
-      
-      - name: Upload artifact
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-        with:
-          name: release-artifact-${{ github.run_id }}
-          path: ./target/release/
-          retention-days: 1
-          if-no-files-found: error
-
-  publish:
-    runs-on: ubuntu-22.04
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Download artifact
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a #v3.0.2
-        with:
-          name: release-artifact-${{ github.run_id }}
-          path: ./target/release/
-
-      - name: Restore Executable Flag 
-        run: chmod +x ./target/release/my-telemetry-server
-      
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::$(echo ${GITHUB_REF_NAME})
 
       - name: Docker login
         env:
