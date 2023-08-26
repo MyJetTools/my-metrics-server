@@ -1,6 +1,8 @@
 use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
+use crate::postgres::dto::MetricDto;
+
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServicesResponse {
     pub services: Vec<ServiceModel>,
@@ -9,7 +11,7 @@ pub struct GetServicesResponse {
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct ServiceModel {
     pub id: String,
-    pub avg: i64,
+    pub avg: i32,
 }
 /////////
 
@@ -40,7 +42,7 @@ pub struct ServiceOverviewContract {
 pub struct GetByServiceDataRequest {
     #[http_query(description = "Id of service")]
     pub id: String,
-    #[http_query(description = "Id of service")]
+    #[http_query(description = "Data of the service")]
     pub data: String,
 }
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
@@ -53,13 +55,24 @@ pub struct MetricHttpModel {
     pub id: i64,
     pub started: i64,
     pub duration: i64,
-
     pub success: Option<String>,
     pub error: Option<String>,
     pub ip: Option<String>,
 }
 
-////////
+impl Into<MetricHttpModel> for MetricDto {
+    fn into(self) -> MetricHttpModel {
+        MetricHttpModel {
+            id: self.id,
+            started: self.started,
+            duration: self.duration_micro,
+            success: self.success,
+            error: self.fail,
+            ip: self.ip,
+        }
+    }
+}
+
 #[derive(Debug, MyHttpInput)]
 pub struct GetByProcessIdRequest {
     #[http_query(name: "processId"; description = "Id of service")]
@@ -80,4 +93,18 @@ pub struct MetricByProcessModel {
     pub success: Option<String>,
     pub error: Option<String>,
     pub ip: Option<String>,
+}
+
+impl Into<MetricByProcessModel> for MetricDto {
+    fn into(self) -> MetricByProcessModel {
+        MetricByProcessModel {
+            id: self.name,
+            data: self.data,
+            started: self.started,
+            duration: self.duration_micro,
+            success: self.success,
+            error: self.fail,
+            ip: self.ip,
+        }
+    }
 }

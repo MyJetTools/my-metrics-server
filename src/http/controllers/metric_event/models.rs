@@ -1,10 +1,40 @@
+use my_http_server::HttpFailResult;
 use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
+
+use crate::postgres::dto::MetricDto;
 
 #[derive(MyHttpInput)]
 pub struct NewMetricsEvent {
     #[http_body_raw(description = "Metrics")]
     pub body: my_http_server::types::RawDataTyped<Vec<NewMetric>>,
+}
+
+impl NewMetricsEvent {
+    pub fn into_dto(self) -> Result<Vec<MetricDto>, HttpFailResult> {
+        let metrics = self.body.deserialize_json()?;
+
+        let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
+
+        for metric in metrics {
+            let mut duration = metric.ended - metric.started;
+            if duration < 0 {
+                duration = 0;
+            }
+            result.push(MetricDto {
+                id: metric.process_id,
+                started: metric.started,
+                duration_micro: duration,
+                name: metric.service_name,
+                data: metric.event_data,
+                success: metric.success,
+                fail: metric.fail,
+                ip: metric.ip,
+            })
+        }
+
+        Ok(result)
+    }
 }
 
 #[derive(Serialize, Deserialize, MyHttpObjectStructure)]

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::app_ctx::AppContext;
 
@@ -10,8 +11,8 @@ use super::models::*;
     method: "GET",
     route: "/ui/GetServices",
     controller: "ui",
-    description: "Get servics overview",
-    summary: "Get servics overview",
+    description: "Get services overview",
+    summary: "Get services overview",
     result:[
         {status_code: 200, description: "List of apps", model="GetServicesResponse"},
     ]
@@ -29,13 +30,18 @@ async fn handle_request(
     action: &GetServicesAction,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    let read_access = action.app.metrics.lock().await;
-    let mut services = Vec::new();
+    let mut from = DateTimeAsMicroseconds::now();
 
-    for domain_model in read_access.get_services() {
+    from.add_days(-1);
+
+    let overview = action.app.repo.get_services(from).await;
+
+    let mut services = Vec::with_capacity(overview.len());
+
+    for dto in overview {
         services.push(ServiceModel {
-            id: domain_model.id,
-            avg: domain_model.avg,
+            id: dto.name,
+            avg: dto.avg.get_value() as i32,
         });
     }
 

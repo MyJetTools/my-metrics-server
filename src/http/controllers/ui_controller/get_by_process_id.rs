@@ -31,23 +31,16 @@ async fn handle_request(
     http_input: GetByProcessIdRequest,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    let events = {
-        let read_access = action.app.metrics.lock().await;
-        read_access.get_by_process_id(http_input.process_id)
-    };
+    let events = action
+        .app
+        .repo
+        .get_by_process_id(http_input.process_id)
+        .await;
 
-    let mut metrics = Vec::new();
+    let mut metrics = Vec::with_capacity(events.len());
 
     for event in events {
-        metrics.push(MetricByProcessModel {
-            id: event.service_name.clone(),
-            data: event.event_data.to_string(),
-            started: event.started.unix_microseconds,
-            duration: event.get_duration_mcs(),
-            success: event.success.clone(),
-            error: event.fail.clone(),
-            ip: event.ip.clone(),
-        });
+        metrics.push(event.into());
     }
 
     let result = MetricsByProcessResponse { metrics };

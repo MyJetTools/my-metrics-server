@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::app_ctx::AppContext;
 
@@ -17,36 +18,41 @@ use super::models::*;
         {status_code: 200, description: "List of apps", model="GetServiceOverviewResponse"},
     ]
 )]
-pub struct GetServiceMetricsOvervewAction {
+pub struct GetServiceMetricsOverviewAction {
     app: Arc<AppContext>,
 }
 
-impl GetServiceMetricsOvervewAction {
+impl GetServiceMetricsOverviewAction {
     pub fn new(app: Arc<AppContext>) -> Self {
         Self { app }
     }
 }
 async fn handle_request(
-    action: &GetServiceMetricsOvervewAction,
+    action: &GetServiceMetricsOverviewAction,
     input_data: GetServiceMetricsOverview,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    let services_overview = {
-        let read_access = action.app.metrics.lock().await;
-        read_access.get_service_overview(&input_data.id)
-    };
+    let mut from = DateTimeAsMicroseconds::now();
+
+    from.add_days(-1);
+
+    let dto_data = action
+        .app
+        .repo
+        .get_service_overview(&input_data.id, from)
+        .await;
 
     let mut data = Vec::new();
 
-    for (_, domain_model) in services_overview {
+    for dto in dto_data {
         data.push(ServiceOverviewContract {
-            data: domain_model.data,
-            min: domain_model.min,
-            max: domain_model.max,
-            avg: domain_model.avg,
-            success: domain_model.success,
-            error: domain_model.error,
-            total: domain_model.total,
+            data: dto.data,
+            min: dto.min,
+            max: dto.max,
+            avg: dto.avg,
+            success: dto.success,
+            error: dto.fail,
+            total: dto.total,
         });
     }
 

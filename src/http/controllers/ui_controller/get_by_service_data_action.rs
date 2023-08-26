@@ -31,22 +31,16 @@ async fn handle_request(
     input_data: GetByServiceDataRequest,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    let events = {
-        let read_access = action.app.metrics.lock().await;
-        read_access.get_metrics_by_resource(&input_data.id, &input_data.data)
-    };
+    let events = action
+        .app
+        .repo
+        .get_by_service_name(&input_data.id, &input_data.data)
+        .await;
 
     let mut metrics = Vec::new();
 
     for event in events {
-        metrics.push(MetricHttpModel {
-            id: event.id,
-            started: event.started.unix_microseconds,
-            duration: event.get_duration_mcs(),
-            success: event.success.clone(),
-            error: event.fail.clone(),
-            ip: event.ip.clone(),
-        });
+        metrics.push(event.into());
     }
 
     let result = MetricsResponse { metrics };
