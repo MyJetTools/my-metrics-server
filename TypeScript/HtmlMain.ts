@@ -9,7 +9,7 @@ class HtmlMain {
     public static generateServicesList(services: IServicesList): string {
 
         let result = '<table style="width:100%; height:100%"><tr style="vertical-align: top;"><td>';
-        for (let service of services.services.sort((a, b) => b.avg > a.avg ? 1 : -1)) {
+        for (let service of services.services) {
             result += '<button id="app-' + service.id + '" service="' + service.id + '" type="button" class="btn btn-light" style="width:300px" onclick="AppSelector.serviceSelected(this)">' + service.id + '<div style="font-size:8px">' + this.micros_to_string(service.avg) + '<div></button>';
         }
 
