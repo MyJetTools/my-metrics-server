@@ -67,11 +67,13 @@ impl MetricsPostgresRepo {
             started: from.unix_microseconds,
         };
 
-        let result = self
+        let mut result = self
             .postgres
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
+
+        result.sort_by(|f1: &ServiceDto, f2| f1.name.cmp(&f2.name));
 
         result
     }
