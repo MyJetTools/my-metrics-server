@@ -30,6 +30,7 @@ impl NewMetricsEvent {
                 success: metric.success,
                 fail: metric.fail,
                 ip: metric.ip,
+                tags: None,
             })
         }
 

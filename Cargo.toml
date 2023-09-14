@@ -25,6 +25,9 @@ my-settings-reader = { tag = "0.1.5", git = "https://github.com/MyJetTools/my-se
     "background-reader",
 ] }
 
+my-grpc-extensions = { tag = "0.4.0", git = "https://github.com/MyJetTools/my-grpc-extensions.git" }
+
+
 flurl = { tag = "0.4.0", git = "https://github.com/MyJetTools/fl-url.git" }
 
 tokio = { version = "*", features = ["full"] }
@@ -37,3 +40,12 @@ serde_json = "*"
 
 async-trait = "*"
 uuid = { version = "*", features = ["serde", "v4"] }
+
+tonic = { version = "*", features = ["tls", "tls-roots", "prost"] }
+anyhow = "*"
+prost = "*"
+prost-types = "*"
+futures-core = "*"
+
+[build-dependencies]
+tonic-build = { version = "*", features = ["prost"] }

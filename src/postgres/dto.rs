@@ -1,5 +1,6 @@
 use my_postgres::GroupByAvg;
 use my_postgres_macros::*;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity)]
 pub struct MetricDto {
@@ -21,6 +22,13 @@ pub struct MetricDto {
     pub success: Option<String>,
     pub fail: Option<String>,
     pub ip: Option<String>,
+    pub tags: Option<Vec<EventTagDto>>,
+}
+
+#[derive(Serialize, Deserialize, MyPostgresJsonModel)]
+pub struct EventTagDto {
+    pub key: String,
+    pub value: String,
 }
 
 #[derive(WhereDbModel)]
@@ -37,7 +45,7 @@ pub struct ServiceDto {
     pub name: String,
 
     #[db_column_name("duration_micro")]
-    pub avg: GroupByAvg,
+    pub avg: GroupByAvg<i64>,
 }
 
 pub struct ServiceOverviewDto {

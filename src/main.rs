@@ -5,9 +5,14 @@ use rust_extensions::MyTimer;
 
 mod app_ctx;
 mod background;
+mod grpc_server;
 mod http;
 mod postgres;
 mod settings;
+
+pub mod writer_grpc {
+    tonic::include_proto!("writer");
+}
 
 #[tokio::main]
 async fn main() {
@@ -39,5 +44,6 @@ async fn main() {
 
     http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
+    grpc_server::start(&app, 8888);
     app.app_states.wait_until_shutdown().await;
 }
