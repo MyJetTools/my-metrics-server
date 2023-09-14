@@ -14,6 +14,10 @@ pub mod writer_grpc {
     tonic::include_proto!("writer");
 }
 
+pub mod reader_grpc {
+    tonic::include_proto!("reader");
+}
+
 #[tokio::main]
 async fn main() {
     let settings_reader = crate::settings::SettingsReader::new(".my-telemetry").await;
