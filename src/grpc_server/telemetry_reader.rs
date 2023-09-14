@@ -127,6 +127,7 @@ impl TelemetryReader for GrpcService {
             duration: dto.duration_micro,
             success: dto.success,
             name: dto.name,
+            data: dto.data,
             fail: dto.fail,
             tags: if let Some(dto_tags) = dto.tags {
                 let mut result = Vec::with_capacity(dto_tags.len());

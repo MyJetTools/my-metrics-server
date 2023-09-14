@@ -52,9 +52,10 @@ message MetricEventGrpcModel{
     int64 Started = 1;
     int64 Duration = 2;
     string Name = 3;
-    optional string Success = 4;
-    optional string Fail = 5;
-    repeated TagGrpcModel Tags  = 6;
+    string Data = 4;
+    optional string Success = 5;
+    optional string Fail = 6;
+    repeated TagGrpcModel Tags  = 7;
 }
 
 service TelemetryReader {
