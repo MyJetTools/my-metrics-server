@@ -11,7 +11,7 @@ use super::server::GrpcService;
 impl TelemetryWriter for GrpcService {
     async fn upload(
         &self,
-        request: tonic::Request<tonic::Streaming<TelemetryEvent>>,
+        request: tonic::Request<tonic::Streaming<TelemetryGrpcEvent>>,
     ) -> Result<tonic::Response<()>, tonic::Status> {
         let request = request.into_inner();
 

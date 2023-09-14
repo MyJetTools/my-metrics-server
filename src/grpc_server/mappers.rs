@@ -1,9 +1,9 @@
 use crate::{
     postgres::dto::{EventTagDto, MetricDto},
-    writer_grpc::TelemetryEvent,
+    writer_grpc::*,
 };
 
-impl Into<MetricDto> for TelemetryEvent {
+impl Into<MetricDto> for TelemetryGrpcEvent {
     fn into(self) -> MetricDto {
         MetricDto {
             id: self.process_id,
