@@ -13,7 +13,6 @@ impl Into<MetricDto> for TelemetryGrpcEvent {
             data: self.event_data,
             success: self.success,
             fail: self.fail,
-            ip: None,
             tags: if self.tags.len() > 0 {
                 let result: Vec<_> = self
                     .tags

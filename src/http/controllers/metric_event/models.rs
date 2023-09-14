@@ -2,7 +2,7 @@ use my_http_server::HttpFailResult;
 use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
-use crate::postgres::dto::MetricDto;
+use crate::postgres::dto::{EventTagDto, MetricDto};
 
 #[derive(MyHttpInput)]
 pub struct NewMetricsEvent {
@@ -16,11 +16,38 @@ impl NewMetricsEvent {
 
         let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
 
-        for metric in metrics {
+        for mut metric in metrics {
             let mut duration = metric.ended - metric.started;
             if duration < 0 {
                 duration = 0;
             }
+
+            let mut tags = None;
+
+            if let Some(http_tags) = metric.tags.take() {
+                for http_tag in http_tags {
+                    if tags.is_none() {
+                        tags = Some(Vec::new());
+                    }
+
+                    tags.as_mut().unwrap().push(EventTagDto {
+                        key: http_tag.key,
+                        value: http_tag.value,
+                    });
+                }
+            }
+
+            if let Some(ip) = metric.ip {
+                if tags.is_none() {
+                    tags = Some(Vec::new());
+                }
+
+                tags.as_mut().unwrap().push(EventTagDto {
+                    key: "ip".to_string(),
+                    value: ip,
+                });
+            }
+
             result.push(MetricDto {
                 id: metric.process_id,
                 started: metric.started,
@@ -29,8 +56,7 @@ impl NewMetricsEvent {
                 data: metric.event_data,
                 success: metric.success,
                 fail: metric.fail,
-                ip: metric.ip,
-                tags: None,
+                tags,
             })
         }
 
@@ -54,4 +80,10 @@ pub struct NewMetric {
     pub success: Option<String>,
     pub fail: Option<String>,
     pub ip: Option<String>,
+    pub tags: Option<Vec<MetricHttpTags>>,
+}
+#[derive(Serialize, Deserialize, MyHttpObjectStructure)]
+pub struct MetricHttpTags {
+    pub key: String,
+    pub value: String,
 }

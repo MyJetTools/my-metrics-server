@@ -21,11 +21,10 @@ pub struct MetricDto {
     pub data: String,
     pub success: Option<String>,
     pub fail: Option<String>,
-    pub ip: Option<String>,
     pub tags: Option<Vec<EventTagDto>>,
 }
 
-#[derive(Serialize, Deserialize, MyPostgresJsonModel)]
+#[derive(Serialize, Deserialize, MyPostgresJsonModel, Debug)]
 pub struct EventTagDto {
     pub key: String,
     pub value: String,

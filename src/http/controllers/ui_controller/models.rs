@@ -68,7 +68,11 @@ impl Into<MetricHttpModel> for MetricDto {
             duration: self.duration_micro,
             success: self.success,
             error: self.fail,
-            ip: self.ip,
+            ip: if let Some(tags) = self.tags {
+                format!("{:?}", tags).into()
+            } else {
+                None
+            },
         }
     }
 }
@@ -104,7 +108,11 @@ impl Into<MetricByProcessModel> for MetricDto {
             duration: self.duration_micro,
             success: self.success,
             error: self.fail,
-            ip: self.ip,
+            ip: if let Some(tags) = self.tags {
+                format!("{:?}", tags).into()
+            } else {
+                None
+            },
         }
     }
 }
