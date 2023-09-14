@@ -1,4 +1,5 @@
 use crate::app_ctx::AppContext;
+use crate::reader_grpc::telemetry_reader_server::TelemetryReaderServer;
 use crate::writer_grpc::telemetry_writer_server::TelemetryWriterServer;
 
 use std::net::SocketAddr;
@@ -32,6 +33,7 @@ async fn start_server(app: Arc<AppContext>, port: u16) {
     anyhow::Context::context(
         Server::builder()
             .add_service(TelemetryWriterServer::new(service.clone()))
+            .add_service(TelemetryReaderServer::new(service.clone()))
             .serve(addr)
             .await,
         "Server error",
