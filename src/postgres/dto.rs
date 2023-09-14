@@ -7,6 +7,7 @@ pub struct MetricDto {
     #[primary_key(0)]
     #[generate_where_model("WhereByProcessId")]
     #[generate_where_model(name:"GcWhereModel", operator = "<")]
+    #[order_by_desc]
     pub id: i64,
     #[primary_key(1)]
     #[db_index(id:0, index_name:"started_idx", is_unique:false, order:"ASC")]
