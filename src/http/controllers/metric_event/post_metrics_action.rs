@@ -6,7 +6,7 @@ use crate::app_ctx::AppContext;
 
 use super::models::NewMetricsEvent;
 
-#[my_http_server_swagger::http_route(
+#[my_http_server::macros::http_route(
     method: "POST",
     route: "/api/add",
     controller: "api",

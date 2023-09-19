@@ -6,7 +6,7 @@ use crate::app_ctx::AppContext;
 
 use super::models::*;
 
-#[my_http_server_swagger::http_route(
+#[my_http_server::macros::http_route(
     method: "GET",
     route: "/ui/GetByServiceData",
     controller: "ui",

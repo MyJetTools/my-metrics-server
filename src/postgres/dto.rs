@@ -1,5 +1,5 @@
+use my_postgres::macros::*;
 use my_postgres::GroupByAvg;
-use my_postgres_macros::*;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity)]

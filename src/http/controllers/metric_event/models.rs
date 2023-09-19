@@ -1,5 +1,5 @@
+use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
 use my_http_server::HttpFailResult;
-use my_http_server_swagger::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
 use crate::postgres::dto::{EventTagDto, MetricDto};
