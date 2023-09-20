@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use my_postgres::{sql_where::NoneWhereModel, MyPostgres, PostgresSettings};
-use rust_extensions::date_time::DateTimeAsMicroseconds;
+use rust_extensions::{date_time::DateTimeAsMicroseconds, StopWatch};
 
 use crate::app_ctx::APP_NAME;
 
@@ -12,15 +12,21 @@ const TABLE_NAME: &'static str = "metrics";
 const PK_NAME: &'static str = "metrics_pk";
 
 pub struct MetricsPostgresRepo {
-    postgres: MyPostgres,
+    postgres_write: MyPostgres,
+    postgres_read: MyPostgres,
 }
 
 impl MetricsPostgresRepo {
     pub async fn new(postgres_settings: Arc<dyn PostgresSettings + Sync + Send + 'static>) -> Self {
         Self {
-            postgres: MyPostgres::from_settings(APP_NAME, postgres_settings)
+            postgres_write: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
                 .set_sql_request_timeout(Duration::from_secs(20))
                 .with_table_schema_verification::<MetricDto>(TABLE_NAME, Some(PK_NAME.into()))
+                .build()
+                .await,
+
+            postgres_read: MyPostgres::from_settings(APP_NAME, postgres_settings)
+                .set_sql_request_timeout(Duration::from_secs(20))
                 .build()
                 .await,
         }
@@ -28,7 +34,7 @@ impl MetricsPostgresRepo {
 
     pub async fn insert(&self, dto_s: &[MetricDto]) {
         let result = self
-            .postgres
+            .postgres_write
             .bulk_insert_db_entities_if_not_exists(TABLE_NAME, dto_s)
             .await;
 
@@ -38,11 +44,17 @@ impl MetricsPostgresRepo {
     }
     pub async fn get_by_process_id(&self, process_id: i64) -> Vec<MetricDto> {
         let where_model = WhereByProcessId { id: process_id };
+        let mut sw = StopWatch::new();
+        sw.start();
         let result = self
-            .postgres
+            .postgres_read
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
+
+        sw.pause();
+
+        println!("get_by_process_id finished in: {:?}", sw.duration());
 
         result
     }
@@ -54,11 +66,18 @@ impl MetricsPostgresRepo {
             limit: 100,
         };
 
+        let mut sw = StopWatch::new();
+        sw.start();
+
         let result = self
-            .postgres
+            .postgres_read
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
+
+        sw.pause();
+
+        println!("get_by_service_name finished in: {:?}", sw.duration());
 
         result
     }
@@ -68,11 +87,18 @@ impl MetricsPostgresRepo {
             started: from.unix_microseconds,
         };
 
+        let mut sw = StopWatch::new();
+        sw.start();
+
         let result = self
-            .postgres
+            .postgres_read
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
+
+        sw.pause();
+
+        println!("get_services finished in: {:?}", sw.duration());
 
         result
     }
@@ -87,18 +113,25 @@ impl MetricsPostgresRepo {
             name: service_name,
         };
 
+        let mut sw = StopWatch::new();
+        sw.start();
+
         let metrics: Vec<MetricDto> = self
-            .postgres
+            .postgres_read
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
+
+        sw.pause();
+
+        println!("get_service_overview finished in: {:?}", sw.duration());
 
         ServiceOverviewDto::from_metric_dto(metrics)
     }
 
     pub async fn get_events_amount(&self) -> usize {
         let result: Option<usize> = self
-            .postgres
+            .postgres_read
             .get_count(TABLE_NAME, NoneWhereModel::new())
             .await
             .unwrap();
@@ -115,7 +148,7 @@ impl MetricsPostgresRepo {
             id: from.unix_microseconds,
         };
 
-        self.postgres
+        self.postgres_read
             .delete_db_entity(TABLE_NAME, &where_model)
             .await
             .unwrap();
