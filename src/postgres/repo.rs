@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use my_postgres::{sql_where::NoneWhereModel, MyPostgres, PostgresSettings};
 use rust_extensions::date_time::DateTimeAsMicroseconds;
@@ -19,6 +19,7 @@ impl MetricsPostgresRepo {
     pub async fn new(postgres_settings: Arc<dyn PostgresSettings + Sync + Send + 'static>) -> Self {
         Self {
             postgres: MyPostgres::from_settings(APP_NAME, postgres_settings)
+                .set_sql_request_timeout(Duration::from_secs(20))
                 .with_table_schema_verification::<MetricDto>(TABLE_NAME, Some(PK_NAME.into()))
                 .build()
                 .await,
