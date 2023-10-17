@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use crate::postgres::dto::MetricDto;
 
-use super::{MetricsByHour, ServiceInfo};
+use super::{ActionInfo, MetricsByHour, ServiceInfo};
 
 pub struct MetricsByActionName {
     data: HashMap<String, MetricsByHour>,
@@ -42,5 +42,15 @@ impl MetricsByActionName {
             avg: avg_result / amount,
             amount: total_amount,
         }
+    }
+
+    pub fn get_action_info(&self) -> BTreeMap<String, ActionInfo> {
+        let mut result = BTreeMap::new();
+
+        for (action_name, data) in self.data.iter() {
+            result.insert(action_name.to_string(), data.get_action_info());
+        }
+
+        result
     }
 }

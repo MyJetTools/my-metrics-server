@@ -12,6 +12,15 @@ pub struct ServiceInfo {
     pub amount: i64,
 }
 
+#[derive(Debug)]
+pub struct ActionInfo {
+    pub max: i64,
+    pub min: i64,
+    pub avg: i64,
+    pub success: i64,
+    pub errors: i64,
+}
+
 pub struct AggregatedMetricsByServiceCache {
     data: Mutex<HashMap<String, MetricsByActionName>>,
 }
@@ -45,5 +54,18 @@ impl AggregatedMetricsByServiceCache {
         }
 
         result
+    }
+
+    pub async fn get_actions_statistics(
+        &self,
+        service_name: &str,
+    ) -> Option<BTreeMap<String, ActionInfo>> {
+        let read_access = self.data.lock().await;
+
+        if let Some(data) = read_access.get(service_name) {
+            return Some(data.get_action_info());
+        }
+
+        None
     }
 }

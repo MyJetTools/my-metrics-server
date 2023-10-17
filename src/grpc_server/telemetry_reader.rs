@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::pin::Pin;
 
 use crate::reader_grpc::telemetry_reader_server::TelemetryReader;
@@ -43,6 +44,18 @@ impl TelemetryReader for GrpcService {
     ) -> Result<tonic::Response<Self::GetAppActionsStream>, tonic::Status> {
         let request = request.into_inner();
 
+        let result = self
+            .app
+            .metrics_cache
+            .get_actions_statistics(&request.app_id)
+            .await;
+
+        let result = match result {
+            Some(result) => result,
+            None => BTreeMap::new(),
+        };
+
+        /*
         let mut from = DateTimeAsMicroseconds::now();
 
         from.add_days(-1);
@@ -53,15 +66,17 @@ impl TelemetryReader for GrpcService {
             .get_service_overview(&request.app_id, from)
             .await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
+         */
+
+        my_grpc_extensions::grpc_server::send_vec_to_stream(result.into_iter(), |dto| {
             AppActionGrpcModel {
-                data: dto.data,
-                min: dto.min,
-                avg: dto.avg,
-                max: dto.max,
-                success: dto.success as i64,
-                error: dto.fail as i64,
-                total: dto.total as i64,
+                data: dto.0,
+                min: dto.1.min,
+                avg: dto.1.avg,
+                max: dto.1.max,
+                success: dto.1.success as i64,
+                error: dto.1.errors as i64,
+                total: (dto.1.success + dto.1.errors) as i64,
             }
         })
         .await

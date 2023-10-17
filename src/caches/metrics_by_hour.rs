@@ -2,11 +2,13 @@ use std::collections::BTreeMap;
 
 use crate::postgres::dto::MetricDto;
 
-use super::ServiceInfo;
+use super::{ActionInfo, ServiceInfo};
 
 pub struct MetricByHour {
     pub min: i64,
     pub max: i64,
+    pub errors_amount: i64,
+    pub success_amount: i64,
     pub sum_of_duration: i64,
     pub amount: i64,
 }
@@ -18,6 +20,8 @@ impl MetricByHour {
             max: src.duration_micro,
             sum_of_duration: src.duration_micro,
             amount: 1,
+            success_amount: if src.success.is_some() { 1 } else { 0 },
+            errors_amount: if src.fail.is_some() { 1 } else { 0 },
         }
     }
 
@@ -32,6 +36,14 @@ impl MetricByHour {
 
         self.sum_of_duration += itm.duration_micro;
         self.amount += 1;
+
+        if itm.success.is_some() {
+            self.success_amount += 1;
+        }
+
+        if itm.fail.is_some() {
+            self.errors_amount += 1;
+        }
     }
 }
 
@@ -80,6 +92,53 @@ impl MetricsByHour {
         ServiceInfo {
             avg: avg_result / amount,
             amount: total_amount,
+        }
+    }
+
+    pub fn get_action_info(&self) -> ActionInfo {
+        let mut min = None;
+        let mut max = None;
+
+        let mut sum_of_duration = 0;
+        let mut total_amount = 0;
+
+        let mut success = 0;
+        let mut errors = 0;
+        for itm in self.data.values() {
+            match &mut min {
+                Some(value) => {
+                    if *value > itm.min {
+                        *value = itm.min
+                    }
+                }
+                None => {
+                    min = Some(itm.min);
+                }
+            }
+
+            match &mut max {
+                Some(value) => {
+                    if *value < itm.max {
+                        *value = itm.max
+                    }
+                }
+                None => {
+                    max = Some(itm.max);
+                }
+            }
+
+            sum_of_duration += itm.sum_of_duration;
+            total_amount += itm.amount;
+            success += itm.success_amount;
+            errors += itm.errors_amount;
+        }
+
+        ActionInfo {
+            max: if let Some(max) = max { max } else { 0 },
+            min: if let Some(min) = max { min } else { 0 },
+            avg: sum_of_duration / total_amount,
+            success,
+            errors,
         }
     }
 }
