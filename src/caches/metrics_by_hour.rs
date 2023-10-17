@@ -135,7 +135,7 @@ impl MetricsByHour {
 
         ActionInfo {
             max: if let Some(max) = max { max } else { 0 },
-            min: if let Some(min) = max { min } else { 0 },
+            min: if let Some(min) = min { min } else { 0 },
             avg: sum_of_duration / total_amount,
             success,
             errors,
