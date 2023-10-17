@@ -66,7 +66,7 @@ impl MetricsByHour {
         let mut amount = 0;
 
         for itm in self.data.values() {
-            avg_result += itm.max - itm.min;
+            avg_result += (itm.max + itm.min) / 2;
             amount += 1;
         }
 
