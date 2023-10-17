@@ -26,11 +26,11 @@ impl MetricByHour {
     }
 
     pub fn update(&mut self, itm: &MetricDto) {
-        if itm.duration_micro < self.min {
+        if itm.duration_micro > self.min {
             self.min = itm.duration_micro;
         }
 
-        if itm.duration_micro < self.max {
+        if itm.duration_micro > self.max {
             self.max = itm.duration_micro;
         }
 
