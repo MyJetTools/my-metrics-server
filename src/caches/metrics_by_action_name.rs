@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::postgres::dto::MetricDto;
 
-use super::MetricsByHour;
+use super::{MetricsByHour, ServiceInfo};
 
 pub struct MetricsByActionName {
     data: HashMap<String, MetricsByHour>,
@@ -24,16 +24,23 @@ impl MetricsByActionName {
         self.data.get_mut(&event.data).unwrap().update(event);
     }
 
-    pub fn get_avg(&self) -> i64 {
+    pub fn get_avg(&self) -> ServiceInfo {
         let mut avg_result = 0;
 
         let mut amount = 0;
 
+        let mut total_amount = 0;
+
         for itm in self.data.values() {
-            avg_result += itm.get_avg_value();
+            let avg = itm.get_avg_value();
+            avg_result += avg.avg;
             amount += 1;
+            total_amount += avg.amount;
         }
 
-        avg_result / amount
+        ServiceInfo {
+            avg: avg_result / amount,
+            amount: total_amount,
+        }
     }
 }

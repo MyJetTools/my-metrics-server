@@ -26,7 +26,8 @@ impl TelemetryReader for GrpcService {
         my_grpc_extensions::grpc_server::send_vec_to_stream(overview.into_iter(), |dto| {
             ServiceGrpcModel {
                 id: dto.0,
-                avg: dto.1,
+                avg: dto.1.avg,
+                amount: dto.1.amount,
             }
         })
         .await

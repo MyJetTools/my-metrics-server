@@ -39,7 +39,7 @@ async fn handle_request(
     let mut services = Vec::with_capacity(overview.len());
 
     for (id, avg) in overview {
-        services.push(ServiceModel { id, avg });
+        services.push(ServiceModel { id, avg: avg.avg });
     }
 
     let result = GetServicesResponse { services };

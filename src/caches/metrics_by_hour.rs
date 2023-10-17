@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 use crate::postgres::dto::MetricDto;
 
+use super::ServiceInfo;
+
 pub struct MetricByHour {
     pub min: i64,
     pub max: i64,
@@ -60,7 +62,7 @@ impl MetricsByHour {
         self.gc()
     }
 
-    pub fn get_avg_value(&self) -> i64 {
+    pub fn get_avg_value(&self) -> ServiceInfo {
         let mut avg_result = 0;
 
         let mut amount = 0;
@@ -69,8 +71,10 @@ impl MetricsByHour {
             avg_result += (itm.max + itm.min) / 2;
             amount += 1;
         }
-
-        avg_result / amount
+        ServiceInfo {
+            avg: avg_result / amount,
+            amount,
+        }
     }
 }
 

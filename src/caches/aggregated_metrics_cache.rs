@@ -6,6 +6,12 @@ use crate::postgres::dto::MetricDto;
 
 use super::MetricsByActionName;
 
+#[derive(Debug)]
+pub struct ServiceInfo {
+    pub avg: i64,
+    pub amount: i64,
+}
+
 pub struct AggregatedMetricsByServiceCache {
     data: Mutex<HashMap<String, MetricsByActionName>>,
 }
@@ -29,7 +35,7 @@ impl AggregatedMetricsByServiceCache {
         }
     }
 
-    pub async fn get_services(&self) -> BTreeMap<String, i64> {
+    pub async fn get_services(&self) -> BTreeMap<String, ServiceInfo> {
         let mut result = BTreeMap::new();
 
         let read_access = self.data.lock().await;
