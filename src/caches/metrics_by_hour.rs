@@ -7,6 +7,7 @@ use super::ServiceInfo;
 pub struct MetricByHour {
     pub min: i64,
     pub max: i64,
+    pub sum_of_duration: i64,
     pub amount: i64,
 }
 
@@ -15,6 +16,7 @@ impl MetricByHour {
         Self {
             min: src.duration_micro,
             max: src.duration_micro,
+            sum_of_duration: src.duration_micro,
             amount: 1,
         }
     }
@@ -28,6 +30,7 @@ impl MetricByHour {
             self.max = itm.duration_micro;
         }
 
+        self.sum_of_duration += itm.duration_micro;
         self.amount += 1;
     }
 }
@@ -67,13 +70,16 @@ impl MetricsByHour {
 
         let mut amount = 0;
 
+        let mut total_amount = 0;
+
         for itm in self.data.values() {
-            avg_result += (itm.max + itm.min) / 2;
+            avg_result += itm.sum_of_duration / itm.amount;
+            total_amount += itm.amount;
             amount += 1;
         }
         ServiceInfo {
             avg: avg_result / amount,
-            amount,
+            amount: total_amount,
         }
     }
 }
