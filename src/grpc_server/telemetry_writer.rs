@@ -27,7 +27,7 @@ impl TelemetryWriter for GrpcService {
         .unwrap();
 
         if let Some(events) = events {
-            self.app.to_write_queue.enqueue(events).await;
+            crate::flows::upload_events(&self.app, events).await;
         }
 
         Ok(tonic::Response::new(()))

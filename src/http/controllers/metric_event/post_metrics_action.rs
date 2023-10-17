@@ -29,11 +29,9 @@ async fn handle_request(
     input_data: NewMetricsEvent,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    action
-        .app
-        .to_write_queue
-        .enqueue(input_data.into_dto()?)
-        .await;
+    let dto = input_data.into_dto()?;
+
+    crate::flows::upload_events(&action.app, dto).await;
 
     return HttpOutput::Empty.into_ok_result(true).into();
 }

@@ -11,7 +11,7 @@ pub struct GetServicesResponse {
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct ServiceModel {
     pub id: String,
-    pub avg: i32,
+    pub avg: i64,
 }
 /////////
 

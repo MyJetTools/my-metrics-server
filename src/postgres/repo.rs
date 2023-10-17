@@ -82,26 +82,28 @@ impl MetricsPostgresRepo {
         result
     }
 
-    pub async fn get_services(&self, from: DateTimeAsMicroseconds) -> Vec<ServiceDto> {
-        let where_model = FromStartedWhereModel {
-            started: from.unix_microseconds,
-        };
+    /*
+       pub async fn get_services(&self, from: DateTimeAsMicroseconds) -> Vec<ServiceDto> {
+           let where_model = FromStartedWhereModel {
+               started: from.unix_microseconds,
+           };
 
-        let mut sw = StopWatch::new();
-        sw.start();
+           let mut sw = StopWatch::new();
+           sw.start();
 
-        let result = self
-            .postgres_read
-            .query_rows(TABLE_NAME, Some(&where_model))
-            .await
-            .unwrap();
+           let result = self
+               .postgres_read
+               .query_rows(TABLE_NAME, Some(&where_model))
+               .await
+               .unwrap();
 
-        sw.pause();
+           sw.pause();
 
-        println!("get_services finished in: {:?}", sw.duration());
+           println!("get_services finished in: {:?}", sw.duration());
 
-        result
-    }
+           result
+       }
+    */
 
     pub async fn get_service_overview(
         &self,

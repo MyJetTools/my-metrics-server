@@ -1,4 +1,7 @@
-use crate::{postgres::MetricsPostgresRepo, settings::SettingsReader};
+use crate::{
+    caches::AggregatedMetricsByServiceCache, postgres::MetricsPostgresRepo,
+    settings::SettingsReader,
+};
 use rust_extensions::AppStates;
 use std::sync::Arc;
 
@@ -13,6 +16,7 @@ pub struct AppContext {
     pub repo: MetricsPostgresRepo,
     pub settings_reader: Arc<SettingsReader>,
     pub to_write_queue: ToWriteQueue,
+    pub metrics_cache: AggregatedMetricsByServiceCache,
 }
 
 impl AppContext {
@@ -23,6 +27,7 @@ impl AppContext {
             process_id: uuid::Uuid::new_v4().to_string(),
             repo: MetricsPostgresRepo::new(settings_reader.clone()).await,
             settings_reader,
+            metrics_cache: AggregatedMetricsByServiceCache::new(),
         }
     }
 }

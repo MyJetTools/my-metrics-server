@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
 use rust_extensions::date_time::DateTimeAsMicroseconds;
@@ -34,24 +34,12 @@ async fn handle_request(
 
     from.add_days(-1);
 
-    let overview = action.app.repo.get_services(from).await;
+    let overview = action.app.metrics_cache.get_services().await;
 
-    let mut sorted = BTreeMap::new();
+    let mut services = Vec::with_capacity(overview.len());
 
-    for dto in overview {
-        sorted.insert(
-            dto.name.clone(),
-            ServiceModel {
-                id: dto.name,
-                avg: dto.avg.get_value() as i32,
-            },
-        );
-    }
-
-    let mut services = Vec::with_capacity(sorted.len());
-
-    for (_, service) in sorted {
-        services.push(service);
+    for (id, avg) in overview {
+        services.push(ServiceModel { id, avg });
     }
 
     let result = GetServicesResponse { services };

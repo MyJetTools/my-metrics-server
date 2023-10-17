@@ -21,11 +21,13 @@ impl TelemetryReader for GrpcService {
 
         from.add_days(-1);
 
-        let overview = self.app.repo.get_services(from).await;
+        let overview = self.app.metrics_cache.get_services().await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(overview, |dto| ServiceGrpcModel {
-            id: dto.name,
-            avg: dto.avg.get_value(),
+        my_grpc_extensions::grpc_server::send_vec_to_stream(overview.into_iter(), |dto| {
+            ServiceGrpcModel {
+                id: dto.0,
+                avg: dto.1,
+            }
         })
         .await
     }
@@ -50,14 +52,16 @@ impl TelemetryReader for GrpcService {
             .get_service_overview(&request.app_id, from)
             .await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data, |dto| AppActionGrpcModel {
-            data: dto.data,
-            min: dto.min,
-            avg: dto.avg,
-            max: dto.max,
-            success: dto.success as i64,
-            error: dto.fail as i64,
-            total: dto.total as i64,
+        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
+            AppActionGrpcModel {
+                data: dto.data,
+                min: dto.min,
+                avg: dto.avg,
+                max: dto.max,
+                success: dto.success as i64,
+                error: dto.fail as i64,
+                total: dto.total as i64,
+            }
         })
         .await
     }
@@ -82,26 +86,28 @@ impl TelemetryReader for GrpcService {
             .get_by_service_name(&request.app_id, &request.data)
             .await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data, |dto| AppDataGrpcModel {
-            process_id: dto.id,
-            started: dto.started,
-            duration: dto.duration_micro,
-            success: dto.success,
-            fail: dto.fail,
-            tags: if let Some(dto_tags) = dto.tags {
-                let mut result = Vec::with_capacity(dto_tags.len());
+        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
+            AppDataGrpcModel {
+                process_id: dto.id,
+                started: dto.started,
+                duration: dto.duration_micro,
+                success: dto.success,
+                fail: dto.fail,
+                tags: if let Some(dto_tags) = dto.tags {
+                    let mut result = Vec::with_capacity(dto_tags.len());
 
-                for dto_tag in dto_tags {
-                    result.push(TagGrpcModel {
-                        key: dto_tag.key,
-                        value: dto_tag.value,
-                    });
-                }
+                    for dto_tag in dto_tags {
+                        result.push(TagGrpcModel {
+                            key: dto_tag.key,
+                            value: dto_tag.value,
+                        });
+                    }
 
-                result
-            } else {
-                vec![]
-            },
+                    result
+                } else {
+                    vec![]
+                },
+            }
         })
         .await
     }
@@ -122,27 +128,29 @@ impl TelemetryReader for GrpcService {
 
         let dto_data = self.app.repo.get_by_process_id(request.process_id).await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data, |dto| MetricEventGrpcModel {
-            started: dto.started,
-            duration: dto.duration_micro,
-            success: dto.success,
-            name: dto.name,
-            data: dto.data,
-            fail: dto.fail,
-            tags: if let Some(dto_tags) = dto.tags {
-                let mut result = Vec::with_capacity(dto_tags.len());
+        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
+            MetricEventGrpcModel {
+                started: dto.started,
+                duration: dto.duration_micro,
+                success: dto.success,
+                name: dto.name,
+                data: dto.data,
+                fail: dto.fail,
+                tags: if let Some(dto_tags) = dto.tags {
+                    let mut result = Vec::with_capacity(dto_tags.len());
 
-                for dto_tag in dto_tags {
-                    result.push(TagGrpcModel {
-                        key: dto_tag.key,
-                        value: dto_tag.value,
-                    });
-                }
+                    for dto_tag in dto_tags {
+                        result.push(TagGrpcModel {
+                            key: dto_tag.key,
+                            value: dto_tag.value,
+                        });
+                    }
 
-                result
-            } else {
-                vec![]
-            },
+                    result
+                } else {
+                    vec![]
+                },
+            }
         })
         .await
     }

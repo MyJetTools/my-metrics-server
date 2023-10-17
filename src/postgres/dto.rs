@@ -2,7 +2,7 @@ use my_postgres::macros::*;
 use my_postgres::GroupByAvg;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(TableSchema, InsertDbEntity, SelectDbEntity)]
+#[derive(TableSchema, InsertDbEntity, SelectDbEntity, Debug)]
 pub struct MetricDto {
     #[primary_key(0)]
     #[generate_where_model("WhereByProcessId")]
@@ -48,6 +48,7 @@ pub struct ServiceDto {
     pub avg: GroupByAvg<i64>,
 }
 
+#[derive(Debug)]
 pub struct ServiceOverviewDto {
     pub data: String,
     pub min: i64,
