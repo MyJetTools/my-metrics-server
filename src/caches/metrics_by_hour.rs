@@ -31,7 +31,7 @@ impl Into<MetricByHour> for StatisticsDto {
 
 impl MetricByHour {
     pub fn update(&mut self, itm: &MetricDto) {
-        if itm.duration_micro < self.min {
+        if itm.duration_micro < self.min || self.min == 0 {
             self.min = itm.duration_micro;
         }
 
