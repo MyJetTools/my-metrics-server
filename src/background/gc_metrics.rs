@@ -15,7 +15,6 @@ impl GcMetricsTimer {
 }
 
 #[async_trait::async_trait]
-
 impl MyTimerTick for GcMetricsTimer {
     async fn tick(&self) {
         let count = self.app.repo.get_events_amount().await;

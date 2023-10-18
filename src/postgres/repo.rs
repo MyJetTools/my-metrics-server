@@ -103,7 +103,7 @@ impl MetricsPostgresRepo {
 
            result
        }
-    */
+
 
     pub async fn get_service_overview(
         &self,
@@ -130,7 +130,7 @@ impl MetricsPostgresRepo {
 
         ServiceOverviewDto::from_metric_dto(metrics)
     }
-
+    */
     pub async fn get_events_amount(&self) -> usize {
         let result: Option<usize> = self
             .postgres_read

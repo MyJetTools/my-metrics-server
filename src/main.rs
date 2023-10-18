@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use background::{GcMetricsTimer, MetricsWriter};
+use background::{GcMetricsTimer, MetricsWriter, SaveStatisticsTimer};
 use rust_extensions::MyTimer;
 
 mod app_ctx;
@@ -36,6 +36,15 @@ async fn main() {
     gc_timer.register_timer("GcTimer", Arc::new(GcMetricsTimer::new(app.clone())));
 
     gc_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
+
+    let mut save_statistics_timer = MyTimer::new(Duration::from_secs(10));
+
+    save_statistics_timer.register_timer(
+        "SaveStatisticsTimer",
+        Arc::new(SaveStatisticsTimer::new(app.clone())),
+    );
+
+    save_statistics_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
     let metrics_writer = MetricsWriter::new(app.clone());
     app.to_write_queue

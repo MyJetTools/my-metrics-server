@@ -12,6 +12,7 @@ pub struct GetServicesResponse {
 pub struct ServiceModel {
     pub id: String,
     pub avg: i64,
+    pub amount: i64,
 }
 /////////
 
@@ -31,9 +32,9 @@ pub struct ServiceOverviewContract {
     pub min: i64,
     pub max: i64,
     pub avg: i64,
-    pub success: usize,
-    pub error: usize,
-    pub total: usize,
+    pub success: i64,
+    pub error: i64,
+    pub total: i64,
 }
 
 ////////////

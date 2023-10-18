@@ -34,12 +34,16 @@ async fn handle_request(
 
     from.add_days(-1);
 
-    let overview = action.app.metrics_cache.get_services().await;
+    let overview = action.app.statistics_repo.get_aggregated_statistics().await;
 
     let mut services = Vec::with_capacity(overview.len());
 
-    for (id, avg) in overview {
-        services.push(ServiceModel { id, avg: avg.avg });
+    for itm in overview {
+        services.push(ServiceModel {
+            id: itm.service,
+            avg: itm.avg,
+            amount: itm.amount,
+        });
     }
 
     let result = GetServicesResponse { services };

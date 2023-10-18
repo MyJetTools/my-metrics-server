@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::pin::Pin;
 
 use crate::reader_grpc::telemetry_reader_server::TelemetryReader;
@@ -22,13 +21,13 @@ impl TelemetryReader for GrpcService {
 
         from.add_days(-1);
 
-        let overview = self.app.metrics_cache.get_services().await;
+        let overview = self.app.statistics_repo.get_aggregated_statistics().await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(overview.into_iter(), |dto| {
             ServiceGrpcModel {
-                id: dto.0,
-                avg: dto.1.avg,
-                amount: dto.1.amount,
+                id: dto.service,
+                avg: dto.avg,
+                amount: dto.amount,
             }
         })
         .await
@@ -46,14 +45,9 @@ impl TelemetryReader for GrpcService {
 
         let result = self
             .app
-            .metrics_cache
-            .get_actions_statistics(&request.app_id)
+            .statistics_repo
+            .get_aggregated_statistics_of_service(&request.app_id)
             .await;
-
-        let result = match result {
-            Some(result) => result,
-            None => BTreeMap::new(),
-        };
 
         /*
         let mut from = DateTimeAsMicroseconds::now();
@@ -70,13 +64,13 @@ impl TelemetryReader for GrpcService {
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(result.into_iter(), |dto| {
             AppActionGrpcModel {
-                data: dto.0,
-                min: dto.1.min,
-                avg: dto.1.avg,
-                max: dto.1.max,
-                success: dto.1.success as i64,
-                error: dto.1.errors as i64,
-                total: (dto.1.success + dto.1.errors) as i64,
+                data: dto.data,
+                min: dto.min,
+                avg: dto.avg,
+                max: dto.max,
+                success: dto.success_amount,
+                error: dto.errors_amount,
+                total: dto.amount,
             }
         })
         .await

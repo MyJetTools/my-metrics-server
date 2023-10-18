@@ -1,71 +1,111 @@
 use std::collections::{BTreeMap, HashMap};
 
-use tokio::sync::Mutex;
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::postgres::dto::MetricDto;
 
-use super::MetricsByActionName;
-
-#[derive(Debug)]
-pub struct ServiceInfo {
-    pub avg: i64,
-    pub amount: i64,
-}
-
-#[derive(Debug)]
-pub struct ActionInfo {
-    pub max: i64,
-    pub min: i64,
-    pub avg: i64,
-    pub success: i64,
-    pub errors: i64,
-}
+use super::{MetricByHour, MetricsByActionName};
 
 pub struct AggregatedMetricsByServiceCache {
-    data: Mutex<HashMap<String, MetricsByActionName>>,
+    data: HashMap<String, MetricsByActionName>,
 }
 
 impl AggregatedMetricsByServiceCache {
     pub fn new() -> Self {
         Self {
-            data: Mutex::new(HashMap::new()),
+            data: HashMap::new(),
         }
     }
 
-    pub async fn update(&self, events: &[MetricDto]) {
-        let mut write_access = self.data.lock().await;
+    pub fn get_to_update(&mut self, event: &MetricDto) -> Option<&mut MetricByHour> {
+        let service_data = self.data.get_mut(&event.name)?;
+        service_data.get_to_update(event)
+    }
 
-        for event in events {
-            if !write_access.contains_key(&event.name) {
-                write_access.insert(event.name.to_string(), MetricsByActionName::new());
+    pub fn restore(&mut self, service: &str, data: &str, hour: i64, metric_by_hour: MetricByHour) {
+        if !self.data.contains_key(service) {
+            self.data
+                .insert(service.to_string(), MetricsByActionName::new());
+        }
+
+        self.data
+            .get_mut(service)
+            .unwrap()
+            .restore(data, hour, metric_by_hour);
+    }
+
+    /*
+       pub fn get_services(&self) -> BTreeMap<String, ServiceInfo> {
+           let mut result = BTreeMap::new();
+
+           for (service_name, data) in self.data.iter() {
+               result.insert(service_name.to_string(), data.get_avg());
+           }
+
+           result
+       }
+
+       pub fn get_actions_statistics(
+           &self,
+           service_name: &str,
+       ) -> Option<BTreeMap<String, ActionInfo>> {
+           if let Some(data) = self.data.get(service_name) {
+               return Some(data.get_action_info());
+           }
+
+           None
+       }
+    */
+
+    pub fn get_metrics_to_save(
+        &self,
+    ) -> Option<BTreeMap<String, BTreeMap<String, BTreeMap<i64, MetricByHour>>>> {
+        let mut result = None;
+
+        for (service_name, data) in self.data.iter() {
+            if let Some(to_save) = data.get_metrics_to_save() {
+                if result.is_none() {
+                    result = Some(BTreeMap::new());
+                }
+                result
+                    .as_mut()
+                    .unwrap()
+                    .insert(service_name.to_string(), to_save);
             }
-
-            write_access.get_mut(&event.name).unwrap().update(event);
-        }
-    }
-
-    pub async fn get_services(&self) -> BTreeMap<String, ServiceInfo> {
-        let mut result = BTreeMap::new();
-
-        let read_access = self.data.lock().await;
-
-        for (service_name, data) in read_access.iter() {
-            result.insert(service_name.to_string(), data.get_avg());
         }
 
         result
     }
 
-    pub async fn get_actions_statistics(
-        &self,
-        service_name: &str,
-    ) -> Option<BTreeMap<String, ActionInfo>> {
-        let read_access = self.data.lock().await;
-
-        if let Some(data) = read_access.get(service_name) {
-            return Some(data.get_action_info());
+    pub fn confirm_metrics_saved(
+        &mut self,
+        metrics: &BTreeMap<String, BTreeMap<String, BTreeMap<i64, MetricByHour>>>,
+    ) {
+        for (service_name, data) in metrics {
+            if let Some(data_from_dict) = self.data.get_mut(service_name) {
+                data_from_dict.confirm_metrics_saved(data);
+            }
         }
 
-        None
+        self.gc_old_data(DateTimeAsMicroseconds::now());
+    }
+
+    fn gc_old_data(&mut self, now: DateTimeAsMicroseconds) {
+        let to_gc = {
+            let mut to_gc = Vec::new();
+            for (service_id, data) in self.data.iter_mut() {
+                let amount_after_gc = data.gc_old_data(now);
+
+                if amount_after_gc == 0 {
+                    to_gc.push(service_id.clone());
+                }
+            }
+
+            to_gc
+        };
+
+        for key in &to_gc {
+            self.data.remove(key);
+        }
     }
 }

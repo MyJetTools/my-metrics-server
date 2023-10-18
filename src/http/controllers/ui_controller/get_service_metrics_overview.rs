@@ -38,8 +38,8 @@ async fn handle_request(
 
     let dto_data = action
         .app
-        .repo
-        .get_service_overview(&input_data.id, from)
+        .statistics_repo
+        .get_aggregated_statistics_of_service(&input_data.id)
         .await;
 
     let mut data = Vec::new();
@@ -50,9 +50,9 @@ async fn handle_request(
             min: dto.min,
             max: dto.max,
             avg: dto.avg,
-            success: dto.success,
-            error: dto.fail,
-            total: dto.total,
+            success: dto.success_amount,
+            error: dto.errors_amount,
+            total: dto.amount,
         });
     }
 

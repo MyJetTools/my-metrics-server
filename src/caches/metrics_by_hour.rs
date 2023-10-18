@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 
-use crate::postgres::dto::MetricDto;
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 
-use super::{ActionInfo, ServiceInfo};
+use crate::postgres::dto::{MetricDto, StatisticsDto};
 
+#[derive(Clone)]
 pub struct MetricByHour {
     pub min: i64,
     pub max: i64,
@@ -11,20 +12,24 @@ pub struct MetricByHour {
     pub success_amount: i64,
     pub sum_of_duration: i64,
     pub amount: i64,
+    pub persist_me: bool,
+}
+
+impl Into<MetricByHour> for StatisticsDto {
+    fn into(self) -> MetricByHour {
+        MetricByHour {
+            min: self.min,
+            max: self.max,
+            errors_amount: self.errors_amount,
+            success_amount: self.success_amount,
+            sum_of_duration: self.sum_of_duration,
+            amount: self.amount,
+            persist_me: false,
+        }
+    }
 }
 
 impl MetricByHour {
-    pub fn new(src: &MetricDto) -> Self {
-        Self {
-            min: src.duration_micro,
-            max: src.duration_micro,
-            sum_of_duration: src.duration_micro,
-            amount: 1,
-            success_amount: if src.success.is_some() { 1 } else { 0 },
-            errors_amount: if src.fail.is_some() { 1 } else { 0 },
-        }
-    }
-
     pub fn update(&mut self, itm: &MetricDto) {
         if itm.duration_micro < self.min {
             self.min = itm.duration_micro;
@@ -44,6 +49,8 @@ impl MetricByHour {
         if itm.fail.is_some() {
             self.errors_amount += 1;
         }
+
+        self.persist_me = true;
     }
 }
 
@@ -58,109 +65,56 @@ impl MetricsByHour {
         }
     }
 
-    fn gc(&mut self) {
-        while self.data.len() > 24 {
-            let first = *self.data.first_key_value().unwrap().0;
-            self.data.remove(&first);
-        }
-    }
-    pub fn update(&mut self, event: &MetricDto) {
-        let rounded_by_hour = round_by_hour(event.started);
-
-        if !self.data.contains_key(&rounded_by_hour) {
-            self.data.insert(rounded_by_hour, MetricByHour::new(event));
-            return;
-        }
-
-        self.data.get_mut(&rounded_by_hour).unwrap().update(event);
-
-        self.gc()
+    pub fn restore(&mut self, hour: i64, metric: MetricByHour) {
+        self.data.insert(hour, metric);
     }
 
-    pub fn get_avg_value(&self) -> ServiceInfo {
-        let mut avg_result = 0;
-
-        let mut amount = 0;
-
-        let mut total_amount = 0;
-
-        for itm in self.data.values() {
-            avg_result += itm.sum_of_duration / itm.amount;
-            total_amount += itm.amount;
-            amount += 1;
-        }
-        ServiceInfo {
-            avg: avg_result / amount,
-            amount: total_amount,
-        }
+    pub fn get_to_update(&mut self, event: &MetricDto) -> Option<&mut MetricByHour> {
+        let rounded_by_hour = event.get_rounded_hour();
+        self.data.get_mut(&rounded_by_hour)
     }
 
-    pub fn get_action_info(&self) -> ActionInfo {
-        let mut min = None;
-        let mut max = None;
+    pub fn get_metrics_to_save(&self) -> Option<BTreeMap<i64, MetricByHour>> {
+        let mut result: Option<BTreeMap<i64, MetricByHour>> = None;
 
-        let mut sum_of_duration = 0;
-        let mut total_amount = 0;
-
-        let mut success = 0;
-        let mut errors = 0;
-        for itm in self.data.values() {
-            match &mut min {
-                Some(value) => {
-                    if *value > itm.min {
-                        *value = itm.min
-                    }
+        for (hour, data) in self.data.iter() {
+            if data.persist_me {
+                if result.is_none() {
+                    result = Some(BTreeMap::new());
                 }
-                None => {
-                    min = Some(itm.min);
+
+                result.as_mut().unwrap().insert(*hour, data.clone());
+            }
+        }
+
+        result
+    }
+
+    pub fn confirm_metrics_saved(&mut self, data: &BTreeMap<i64, MetricByHour>) {
+        for hour in data.keys() {
+            if let Some(data_to_confirm) = self.data.get_mut(hour) {
+                data_to_confirm.persist_me = false;
+            }
+        }
+    }
+
+    pub fn gc_old_data(&mut self, mut now: DateTimeAsMicroseconds) -> usize {
+        now.add_hours(-2);
+
+        let mut keys_to_gc = Vec::new();
+
+        {
+            for key in self.data.keys() {
+                if key < &now.unix_microseconds {
+                    keys_to_gc.push(*key);
                 }
             }
-
-            match &mut max {
-                Some(value) => {
-                    if *value < itm.max {
-                        *value = itm.max
-                    }
-                }
-                None => {
-                    max = Some(itm.max);
-                }
-            }
-
-            sum_of_duration += itm.sum_of_duration;
-            total_amount += itm.amount;
-            success += itm.success_amount;
-            errors += itm.errors_amount;
         }
 
-        ActionInfo {
-            max: if let Some(max) = max { max } else { 0 },
-            min: if let Some(min) = min { min } else { 0 },
-            avg: sum_of_duration / total_amount,
-            success,
-            errors,
+        for key_to_gc in keys_to_gc {
+            self.data.remove(&key_to_gc);
         }
-    }
-}
 
-fn round_by_hour(micro_seconds: i64) -> i64 {
-    micro_seconds - micro_seconds % 3600_000_000
-}
-
-#[cfg(test)]
-mod tests {
-    use rust_extensions::date_time::DateTimeAsMicroseconds;
-
-    use super::round_by_hour;
-
-    #[test]
-    fn test_round_by_hour() {
-        let dt = DateTimeAsMicroseconds::from_str("2015-01-05:12:43.23.123").unwrap();
-
-        let rounded = round_by_hour(dt.unix_microseconds);
-
-        let dest = DateTimeAsMicroseconds::new(rounded);
-
-        assert_eq!(&dest.to_rfc3339()[..19], "2015-01-05T12:00:00");
+        self.data.len()
     }
 }
