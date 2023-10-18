@@ -37,7 +37,7 @@ async fn main() {
 
     gc_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
-    let mut save_statistics_timer = MyTimer::new(Duration::from_secs(10));
+    let mut save_statistics_timer = MyTimer::new(Duration::from_secs(3));
 
     save_statistics_timer.register_timer(
         "SaveStatisticsTimer",
