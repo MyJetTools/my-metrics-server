@@ -91,7 +91,7 @@ impl StatisticsRepo {
 
         let where_model = StatisticByDateAndServiceWhereModel {
             date: dt.unix_microseconds,
-            data: app,
+            service: app,
         };
 
         let records: Vec<SelectByServiceStatisticDto> = self

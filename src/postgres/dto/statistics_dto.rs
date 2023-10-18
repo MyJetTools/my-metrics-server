@@ -48,7 +48,7 @@ pub struct StatisticByDateWhereModel {
 
 #[derive(WhereDbModel)]
 pub struct StatisticByDateAndServiceWhereModel<'s> {
-    pub data: &'s str,
+    pub service: &'s str,
     #[operator(">=")]
     pub date: i64,
 }
