@@ -157,6 +157,7 @@ impl MetricsPostgresRepo {
         };
 
         self.postgres_gc
+            .with_retries(3, Duration::from_secs(3))
             .delete_db_entity(TABLE_NAME, &where_model)
             .await
             .unwrap();
