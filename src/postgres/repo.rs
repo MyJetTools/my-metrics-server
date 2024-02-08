@@ -14,6 +14,7 @@ const PK_NAME: &'static str = "metrics_pk";
 pub struct MetricsPostgresRepo {
     postgres_write: MyPostgres,
     postgres_read: MyPostgres,
+    postgres_gc: MyPostgres,
 }
 
 impl MetricsPostgresRepo {
@@ -25,8 +26,14 @@ impl MetricsPostgresRepo {
                 .build()
                 .await,
 
-            postgres_read: MyPostgres::from_settings(APP_NAME, postgres_settings)
+            postgres_read: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
                 .set_sql_request_timeout(Duration::from_secs(30))
+                .build()
+                .await,
+
+            postgres_gc: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
+                .set_sql_request_timeout(Duration::from_secs(30))
+                .with_table_schema_verification::<MetricDto>(TABLE_NAME, Some(PK_NAME.into()))
                 .build()
                 .await,
         }
@@ -150,7 +157,7 @@ impl MetricsPostgresRepo {
             id: from.unix_microseconds,
         };
 
-        self.postgres_read
+        self.postgres_gc
             .delete_db_entity(TABLE_NAME, &where_model)
             .await
             .unwrap();
