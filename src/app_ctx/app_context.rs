@@ -3,7 +3,7 @@ use crate::{
     postgres::{MetricsPostgresRepo, StatisticsRepo},
     settings::SettingsReader,
 };
-use rust_extensions::AppStates;
+use rust_extensions::{events_loop::EventsLoopPublisher, AppStates};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -23,9 +23,12 @@ pub struct AppContext {
 }
 
 impl AppContext {
-    pub async fn new(settings_reader: Arc<SettingsReader>) -> AppContext {
+    pub async fn new(
+        settings_reader: Arc<SettingsReader>,
+        events_loop_publisher: EventsLoopPublisher<()>,
+    ) -> AppContext {
         AppContext {
-            to_write_queue: ToWriteQueue::new(),
+            to_write_queue: ToWriteQueue::new(events_loop_publisher),
             app_states: Arc::new(AppStates::create_initialized()),
             process_id: uuid::Uuid::new_v4().to_string(),
             repo: MetricsPostgresRepo::new(settings_reader.clone()).await,

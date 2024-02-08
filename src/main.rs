@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use background::{GcMetricsTimer, MetricsWriter, SaveStatisticsTimer};
-use rust_extensions::MyTimer;
+use rust_extensions::{events_loop::EventsLoop, MyTimer};
 
 mod app_ctx;
 mod background;
@@ -25,7 +25,10 @@ async fn main() {
     let settings_reader = crate::settings::SettingsReader::new(".my-telemetry").await;
 
     let settings_reader = Arc::new(settings_reader);
-    let app = app_ctx::AppContext::new(settings_reader).await;
+
+    let mut events_loop = EventsLoop::new("MetricsWriter".to_string(), my_logger::LOGGER.clone());
+
+    let app = app_ctx::AppContext::new(settings_reader, events_loop.get_publisher()).await;
 
     let app = Arc::new(app);
 
@@ -47,15 +50,9 @@ async fn main() {
     save_statistics_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
     let metrics_writer = MetricsWriter::new(app.clone());
-    app.to_write_queue
-        .events_loop
-        .register_event_loop(Arc::new(metrics_writer))
-        .await;
+    events_loop.register_event_loop(Arc::new(metrics_writer));
 
-    app.to_write_queue
-        .events_loop
-        .start(app.app_states.clone(), my_logger::LOGGER.clone())
-        .await;
+    events_loop.start(app.app_states.clone());
 
     http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
 

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use rust_extensions::events_loop::EventsLoop;
+use rust_extensions::events_loop::EventsLoopPublisher;
 use tokio::sync::Mutex;
 
 use crate::postgres::dto::MetricDto;
@@ -8,14 +8,14 @@ use crate::postgres::dto::MetricDto;
 pub struct ToWriteQueue {
     pub metrics: Mutex<VecDeque<MetricDto>>,
 
-    pub events_loop: EventsLoop<()>,
+    pub events_loop: EventsLoopPublisher<()>,
 }
 
 impl ToWriteQueue {
-    pub fn new() -> Self {
+    pub fn new(events_loop: EventsLoopPublisher<()>) -> Self {
         Self {
             metrics: Mutex::new(VecDeque::new()),
-            events_loop: EventsLoop::new("ToQueueWriter".to_string()),
+            events_loop,
         }
     }
 
