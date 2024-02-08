@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::events_loop::EventsLoopTick;
+use rust_extensions::{events_loop::EventsLoopTick, StopWatch};
 
 use crate::{app_ctx::AppContext, caches::MetricByHour};
 
@@ -21,7 +21,11 @@ impl EventsLoopTick<()> for MetricsWriter {
 
     async fn tick(&self, _: ()) {
         while let Some(events_to_write) = self.app.to_write_queue.get_events_to_write(1000).await {
+            let mut sw = StopWatch::new();
+            sw.start();
             self.app.repo.insert(&events_to_write).await;
+            sw.pause();
+            println!("MetricsWriter written metrics in: {:?}", sw.duration());
 
             let mut write_access = self.app.metrics_cache.lock().await;
 
