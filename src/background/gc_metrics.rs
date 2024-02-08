@@ -33,6 +33,6 @@ impl MyTimerTick for GcMetricsTimer {
 
         self.app.repo.gc(gc_before).await;
 
-        println!("Executing GC");
+        println!("Executed GC");
     }
 }
