@@ -33,7 +33,6 @@ impl MetricsPostgresRepo {
 
             postgres_gc: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
                 .set_sql_request_timeout(Duration::from_secs(30))
-                .with_table_schema_verification::<MetricDto>(TABLE_NAME, Some(PK_NAME.into()))
                 .build()
                 .await,
         }
