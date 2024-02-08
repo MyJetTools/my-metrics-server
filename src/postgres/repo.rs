@@ -32,7 +32,7 @@ impl MetricsPostgresRepo {
                 .await,
 
             postgres_gc: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
-                .set_sql_request_timeout(Duration::from_secs(60))
+                .set_sql_request_timeout(Duration::from_secs(60 * 3))
                 .build()
                 .await,
         }

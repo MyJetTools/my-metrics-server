@@ -34,7 +34,8 @@ async fn main() {
 
     let mut http_server = http::start_up::setup_server(&app, 8000);
 
-    let mut gc_timer = MyTimer::new(Duration::from_secs(10));
+    let mut gc_timer =
+        MyTimer::new_with_execute_timeout(Duration::from_secs(10), Duration::from_secs(60 * 5));
 
     gc_timer.register_timer("GcTimer", Arc::new(GcMetricsTimer::new(app.clone())));
 
