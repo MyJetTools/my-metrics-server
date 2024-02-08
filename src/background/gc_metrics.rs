@@ -19,6 +19,8 @@ impl MyTimerTick for GcMetricsTimer {
     async fn tick(&self) {
         let count = self.app.repo.get_events_amount().await;
 
+        println!("GC: Events amount: {}", count);
+
         let min_events_to_keep = self
             .app
             .settings_reader
@@ -41,6 +43,10 @@ impl MyTimerTick for GcMetricsTimer {
 
         gc_before.add_seconds(-as_seconds);
 
+        println!("Executing GC from: {}", gc_before.to_rfc3339());
+
         self.app.repo.gc(gc_before).await;
+
+        println!("Executing GC");
     }
 }
