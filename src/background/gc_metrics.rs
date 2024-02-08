@@ -17,15 +17,22 @@ impl GcMetricsTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for GcMetricsTimer {
     async fn tick(&self) {
-        let count = self.app.repo.get_events_amount().await;
-
-        println!("GC: Events amount: {}", count);
-
         let min_events_to_keep = self
             .app
             .settings_reader
             .get_min_events_to_keep_before_gc()
             .await;
+
+        let app = self.app.clone();
+
+        let count = tokio::spawn(async move { app.repo.get_events_amount().await }).await;
+
+        let count = match count {
+            Ok(count) => count,
+            Err(_) => min_events_to_keep + 10,
+        };
+
+        println!("GC: Events amount: {}", count);
 
         if count < min_events_to_keep {
             return;
