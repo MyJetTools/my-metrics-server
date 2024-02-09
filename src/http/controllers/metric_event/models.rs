@@ -2,6 +2,7 @@ use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
 use my_http_server::HttpFailResult;
 use serde::{Deserialize, Serialize};
 
+use crate::ignore_events::IgnoreEvents;
 use crate::postgres::dto::{EventTagDto, MetricDto};
 
 #[derive(MyHttpInput)]
@@ -11,12 +12,16 @@ pub struct NewMetricsEvent {
 }
 
 impl NewMetricsEvent {
-    pub fn into_dto(self) -> Result<Vec<MetricDto>, HttpFailResult> {
+    pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Result<Vec<MetricDto>, HttpFailResult> {
         let metrics = self.body.deserialize_json()?;
 
         let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
 
         for mut metric in metrics {
+            if ignore_events.event_should_be_ignored(&metric.service_name, &metric.event_data) {
+                continue;
+            }
+
             let mut duration = metric.ended - metric.started;
             if duration < 0 {
                 duration = 0;

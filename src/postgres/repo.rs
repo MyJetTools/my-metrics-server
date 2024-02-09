@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use my_postgres::{sql_where::NoneWhereModel, MyPostgres, PostgresSettings};
+use my_postgres::{MyPostgres, PostgresSettings};
 use rust_extensions::{date_time::DateTimeAsMicroseconds, StopWatch};
 
 use crate::app_ctx::APP_NAME;
@@ -89,15 +89,42 @@ impl MetricsPostgresRepo {
     }
 
     /*
-       pub async fn get_services(&self, from: DateTimeAsMicroseconds) -> Vec<ServiceDto> {
-           let where_model = FromStartedWhereModel {
+          pub async fn get_services(&self, from: DateTimeAsMicroseconds) -> Vec<ServiceDto> {
+              let where_model = FromStartedWhereModel {
+                  started: from.unix_microseconds,
+              };
+
+              let mut sw = StopWatch::new();
+              sw.start();
+
+              let result = self
+                  .postgres_read
+                  .query_rows(TABLE_NAME, Some(&where_model))
+                  .await
+                  .unwrap();
+
+              sw.pause();
+
+              println!("get_services finished in: {:?}", sw.duration());
+
+              result
+          }
+
+
+       pub async fn get_service_overview(
+           &self,
+           service_name: &str,
+           from: DateTimeAsMicroseconds,
+       ) -> Vec<ServiceOverviewDto> {
+           let where_model = FromStartedAndServiceNameWhereModel {
                started: from.unix_microseconds,
+               name: service_name,
            };
 
            let mut sw = StopWatch::new();
            sw.start();
 
-           let result = self
+           let metrics: Vec<MetricDto> = self
                .postgres_read
                .query_rows(TABLE_NAME, Some(&where_model))
                .await
@@ -105,52 +132,25 @@ impl MetricsPostgresRepo {
 
            sw.pause();
 
-           println!("get_services finished in: {:?}", sw.duration());
+           println!("get_service_overview finished in: {:?}", sw.duration());
 
-           result
+           ServiceOverviewDto::from_metric_dto(metrics)
        }
 
+       pub async fn get_events_amount(&self) -> usize {
+           let result: Option<usize> = self
+               .postgres_read
+               .get_count(TABLE_NAME, NoneWhereModel::new())
+               .await
+               .unwrap();
 
-    pub async fn get_service_overview(
-        &self,
-        service_name: &str,
-        from: DateTimeAsMicroseconds,
-    ) -> Vec<ServiceOverviewDto> {
-        let where_model = FromStartedAndServiceNameWhereModel {
-            started: from.unix_microseconds,
-            name: service_name,
-        };
+           if result.is_none() {
+               return 0;
+           }
 
-        let mut sw = StopWatch::new();
-        sw.start();
-
-        let metrics: Vec<MetricDto> = self
-            .postgres_read
-            .query_rows(TABLE_NAME, Some(&where_model))
-            .await
-            .unwrap();
-
-        sw.pause();
-
-        println!("get_service_overview finished in: {:?}", sw.duration());
-
-        ServiceOverviewDto::from_metric_dto(metrics)
-    }
+           result.unwrap()
+       }
     */
-    pub async fn get_events_amount(&self) -> usize {
-        let result: Option<usize> = self
-            .postgres_read
-            .get_count(TABLE_NAME, NoneWhereModel::new())
-            .await
-            .unwrap();
-
-        if result.is_none() {
-            return 0;
-        }
-
-        result.unwrap()
-    }
-
     pub async fn gc(&self, from: DateTimeAsMicroseconds) {
         let where_model = GcWhereModel {
             id: from.unix_microseconds,

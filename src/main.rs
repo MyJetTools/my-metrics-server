@@ -9,6 +9,7 @@ mod caches;
 mod flows;
 mod grpc_server;
 mod http;
+mod ignore_events;
 mod postgres;
 mod settings;
 

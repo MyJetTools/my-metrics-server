@@ -15,12 +15,20 @@ impl TelemetryWriter for GrpcService {
     ) -> Result<tonic::Response<()>, tonic::Status> {
         let request = request.into_inner();
 
-        let events = my_grpc_extensions::read_grpc_stream::as_vec_with_transformation(
+        let ignore_events = self.app.settings_reader.get_ignore_events().await;
+
+        let events = my_grpc_extensions::read_grpc_stream::as_vec_with_transformation_and_filter(
             request,
             READ_TIMEOUT,
             &|grpc_model| {
-                let result: MetricDto = grpc_model.into();
-                result
+                if ignore_events
+                    .event_should_be_ignored(&grpc_model.service_name, &grpc_model.event_data)
+                {
+                    None
+                } else {
+                    let result: MetricDto = grpc_model.into();
+                    Some(result)
+                }
             },
         )
         .await
