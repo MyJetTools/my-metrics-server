@@ -51,3 +51,26 @@ impl PostgresSettings for SettingsReader {
         read_access.postgres_conn_string.clone()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        let model = SettingsModel {
+            postgres_conn_string: "postgres://postgres:postgres@localhost:5432/postgres"
+                .to_string(),
+            retention_period: "1h".to_string(),
+            min_events_to_keep_before_gc: 10,
+            ignore_events: vec![IgnoreEvent {
+                name: "test".to_string(),
+                data: "[SignalR] ping".to_string(),
+            }],
+        };
+
+        let result = serde_yaml::to_string(&model).unwrap();
+
+        println!("{}", result);
+    }
+}

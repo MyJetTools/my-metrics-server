@@ -25,7 +25,11 @@ impl EventsLoopTick<()> for MetricsWriter {
             sw.start();
             self.app.repo.insert(&events_to_write).await;
             sw.pause();
-            println!("MetricsWriter written metrics in: {:?}", sw.duration());
+            println!(
+                "MetricsWriter written {} metrics in: {:?}",
+                events_to_write.len(),
+                sw.duration()
+            );
 
             let mut write_access = self.app.metrics_cache.lock().await;
 
