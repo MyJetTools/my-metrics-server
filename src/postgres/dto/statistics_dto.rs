@@ -7,11 +7,13 @@ pub struct StatisticsDto {
     pub service: String,
     #[primary_key(1)]
     #[generate_where_model("WhereByHourModel")]
-    pub data: String,
+    pub data_hashed: String,
     #[primary_key(2)]
     #[generate_where_model("WhereByHourModel")]
     #[order_by_desc]
     pub date: i64,
+
+    pub data: String,
     pub max: i64,
     pub min: i64,
     pub errors_amount: i64,

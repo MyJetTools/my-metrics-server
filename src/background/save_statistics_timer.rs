@@ -35,8 +35,9 @@ impl MyTimerTick for SaveStatisticsTimer {
                 for (hour, data) in data {
                     dto_to_insert.push(StatisticsDto {
                         service: service_name.to_string(),
-                        data: action_name.to_string(),
+                        data_hashed: crate::postgres::data_hashed::calc(action_name),
                         date: *hour,
+                        data: action_name.to_string(),
                         max: data.max,
                         min: data.min,
                         errors_amount: data.errors_amount,

@@ -8,7 +8,6 @@ use crate::app_ctx::APP_NAME;
 use super::dto::*;
 
 const TABLE_NAME: &'static str = "statistics";
-
 const PK_NAME: &'static str = "statistics_pk";
 
 #[derive(Debug)]
@@ -117,10 +116,10 @@ impl StatisticsRepo {
         result
     }
 
-    pub async fn restore(&self, service: &str, app: &str, rounded_hour: i64) -> StatisticsDto {
+    pub async fn restore(&self, service: &str, data: &str, rounded_hour: i64) -> StatisticsDto {
         let where_model = WhereByHourModel {
             service: service.to_string(),
-            data: app.to_string(),
+            data_hashed: super::data_hashed::calc(data),
             date: rounded_hour,
         };
 
@@ -134,7 +133,8 @@ impl StatisticsRepo {
             Some(result) => result,
             None => StatisticsDto {
                 service: service.to_string(),
-                data: app.to_string(),
+                data_hashed: super::data_hashed::calc(data),
+                data: data.to_string(),
                 date: rounded_hour,
                 max: 0,
                 min: 0,
