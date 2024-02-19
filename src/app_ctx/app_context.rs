@@ -9,7 +9,7 @@ use tokio::sync::Mutex;
 
 use super::ToWriteQueue;
 
-pub const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
+//pub const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
 pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub struct AppContext {
@@ -27,12 +27,15 @@ impl AppContext {
         settings_reader: Arc<SettingsReader>,
         events_loop_publisher: EventsLoopPublisher<()>,
     ) -> AppContext {
+        let repo_file_name = settings_reader.get_db_file_name("metrics.db").await;
+        let statistic_db_file_name = settings_reader.get_db_file_name("statistics.db").await;
+
         AppContext {
             to_write_queue: ToWriteQueue::new(events_loop_publisher),
             app_states: Arc::new(AppStates::create_initialized()),
             process_id: uuid::Uuid::new_v4().to_string(),
-            repo: MetricsPostgresRepo::new(settings_reader.clone()).await,
-            statistics_repo: StatisticsRepo::new(settings_reader.clone()).await,
+            repo: MetricsPostgresRepo::new(repo_file_name).await,
+            statistics_repo: StatisticsRepo::new(statistic_db_file_name).await,
             settings_reader,
             metrics_cache: Mutex::new(AggregatedMetricsByServiceCache::new()),
         }

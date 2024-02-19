@@ -16,11 +16,14 @@ rust-extensions = { tag = "0.1.4", git = "https://github.com/MyJetTools/rust-ext
 ] }
 my-logger = { tag = "1.1.0", git = "https://github.com/MyJetTools/my-logger.git" }
 
-my-postgres = { tag = "0.5.2", git = "https://github.com/MyJetTools/my-postgres.git", features = [
-    "with-tls",
+#my-postgres = { tag = "0.5.2", git = "https://github.com/MyJetTools/my-postgres.git", features = [
+#    "with-tls",
+#    "macros",
+#] }
+
+my-sqlite = { tag = "0.1.0", git = "https://github.com/MyJetTools/my-sqlite.git", features = [
     "macros",
 ] }
-
 
 my-settings-reader = { tag = "0.3.0", git = "https://github.com/MyJetTools/my-settings-reader.git", features = [
     "background-reader",

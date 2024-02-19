@@ -1,47 +1,31 @@
-use std::{sync::Arc, time::Duration};
-
-use my_postgres::{MyPostgres, PostgresSettings};
+use my_sqlite::{SqlLiteConnection, SqlLiteConnectionBuilder};
 use rust_extensions::{date_time::DateTimeAsMicroseconds, StopWatch};
-
-use crate::app_ctx::APP_NAME;
 
 use super::dto::*;
 
 const TABLE_NAME: &'static str = "metrics";
 
-const PK_NAME: &'static str = "metrics_pk";
+//const PK_NAME: &'static str = "metrics_pk";
 
 pub struct MetricsPostgresRepo {
-    postgres_write: MyPostgres,
-    postgres_read: MyPostgres,
-    postgres_gc: MyPostgres,
+    connection: SqlLiteConnection,
 }
 
 impl MetricsPostgresRepo {
-    pub async fn new(postgres_settings: Arc<dyn PostgresSettings + Sync + Send + 'static>) -> Self {
+    pub async fn new(file_name: String) -> Self {
         Self {
-            postgres_write: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
-                .set_sql_request_timeout(Duration::from_secs(60))
-                .with_table_schema_verification::<MetricDto>(TABLE_NAME, Some(PK_NAME.into()))
+            connection: SqlLiteConnectionBuilder::new(file_name)
+                .create_table_if_no_exists::<MetricDto>(TABLE_NAME)
                 .build()
-                .await,
-
-            postgres_read: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
-                .set_sql_request_timeout(Duration::from_secs(60))
-                .build()
-                .await,
-
-            postgres_gc: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
-                .set_sql_request_timeout(Duration::from_secs(60 * 3))
-                .build()
-                .await,
+                .await
+                .unwrap(),
         }
     }
 
     pub async fn insert(&self, dto_s: &[MetricDto]) {
         let result = self
-            .postgres_write
-            .bulk_insert_db_entities_if_not_exists(TABLE_NAME, dto_s)
+            .connection
+            .bulk_insert_db_entities_if_not_exists(dto_s, TABLE_NAME)
             .await;
 
         if let Err(err) = result {
@@ -53,7 +37,7 @@ impl MetricsPostgresRepo {
         let mut sw = StopWatch::new();
         sw.start();
         let result = self
-            .postgres_read
+            .connection
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
@@ -76,7 +60,7 @@ impl MetricsPostgresRepo {
         sw.start();
 
         let result = self
-            .postgres_read
+            .connection
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
@@ -156,8 +140,7 @@ impl MetricsPostgresRepo {
             id: from.unix_microseconds,
         };
 
-        self.postgres_gc
-            .with_retries(3, Duration::from_secs(3))
+        self.connection
             .delete_db_entity(TABLE_NAME, &where_model)
             .await
             .unwrap();

@@ -1,14 +1,10 @@
-use std::{sync::Arc, time::Duration};
-
-use my_postgres::{MyPostgres, PostgresSettings, UpdateConflictType};
+use my_sqlite::{SqlLiteConnection, SqlLiteConnectionBuilder};
 use rust_extensions::date_time::DateTimeAsMicroseconds;
-
-use crate::app_ctx::APP_NAME;
 
 use super::dto::*;
 
 const TABLE_NAME: &'static str = "statistics";
-const PK_NAME: &'static str = "statistics_pk";
+//const PK_NAME: &'static str = "statistics_pk";
 
 #[derive(Debug)]
 pub struct AggregatedStatistics {
@@ -29,27 +25,23 @@ pub struct AggregatedStatisticByService {
 }
 
 pub struct StatisticsRepo {
-    postgres: MyPostgres,
+    connection: SqlLiteConnection,
 }
 
 impl StatisticsRepo {
-    pub async fn new(postgres_settings: Arc<dyn PostgresSettings + Sync + Send + 'static>) -> Self {
+    pub async fn new(file_name: String) -> Self {
         Self {
-            postgres: MyPostgres::from_settings(APP_NAME, postgres_settings.clone())
-                .set_sql_request_timeout(Duration::from_secs(20))
-                .with_table_schema_verification::<StatisticsDto>(TABLE_NAME, Some(PK_NAME.into()))
+            connection: SqlLiteConnectionBuilder::new(file_name)
+                .create_table_if_no_exists::<StatisticsDto>(TABLE_NAME)
                 .build()
-                .await,
+                .await
+                .unwrap(),
         }
     }
 
     pub async fn update_metrics(&self, dto_s: &[StatisticsDto]) {
-        self.postgres
-            .bulk_insert_or_update_db_entity(
-                TABLE_NAME,
-                UpdateConflictType::OnPrimaryKeyConstraint(PK_NAME.into()),
-                dto_s,
-            )
+        self.connection
+            .bulk_insert_or_update(dto_s, TABLE_NAME)
             .await
             .unwrap();
     }
@@ -63,7 +55,7 @@ impl StatisticsRepo {
         };
 
         let records: Vec<SelectServicesStatisticDto> = self
-            .postgres
+            .connection
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
@@ -94,7 +86,7 @@ impl StatisticsRepo {
         };
 
         let records: Vec<SelectByServiceStatisticDto> = self
-            .postgres
+            .connection
             .query_rows(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();
@@ -124,7 +116,7 @@ impl StatisticsRepo {
         };
 
         let result = self
-            .postgres
+            .connection
             .query_single_row(TABLE_NAME, Some(&where_model))
             .await
             .unwrap();

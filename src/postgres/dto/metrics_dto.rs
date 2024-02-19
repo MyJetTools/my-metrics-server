@@ -1,5 +1,5 @@
-use my_postgres::macros::*;
-use my_postgres::GroupByAvg;
+use my_sqlite::macros::*;
+use my_sqlite::GroupByAvg;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity, Debug)]
@@ -31,7 +31,7 @@ impl MetricDto {
     }
 }
 
-#[derive(Serialize, Deserialize, MyPostgresJsonModel, Debug)]
+#[derive(Serialize, Deserialize, DbJsonModel, Debug)]
 pub struct EventTagDto {
     pub key: String,
     pub value: String,

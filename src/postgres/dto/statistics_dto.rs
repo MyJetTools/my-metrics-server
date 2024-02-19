@@ -1,4 +1,4 @@
-use my_postgres::{macros::*, GroupByMax, GroupByMin, GroupBySum};
+use my_sqlite::{macros::*, GroupByMax, GroupByMin, GroupBySum};
 
 #[derive(TableSchema, InsertDbEntity, UpdateDbEntity, SelectDbEntity, Debug)]
 pub struct StatisticsDto {
