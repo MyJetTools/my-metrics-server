@@ -21,6 +21,8 @@ pub mod reader_grpc {
     tonic::include_proto!("reader");
 }
 
+const DEFAULT_PORT: u16 = 8000;
+
 #[tokio::main]
 async fn main() {
     let settings_reader = crate::settings::SettingsReader::new(".my-telemetry").await;
@@ -33,7 +35,16 @@ async fn main() {
 
     let app = Arc::new(app);
 
-    let mut http_server = http::start_up::setup_server(&app, 8000);
+    let http_port = if let Ok(result) = std::env::var("HTTP_PORT") {
+        match result.parse() {
+            Ok(port) => port,
+            Err(_) => DEFAULT_PORT,
+        }
+    } else {
+        DEFAULT_PORT
+    };
+
+    let mut http_server = http::start_up::setup_server(&app, http_port);
 
     let mut gc_timer =
         MyTimer::new_with_execute_timeout(Duration::from_secs(10), Duration::from_secs(60 * 5));
