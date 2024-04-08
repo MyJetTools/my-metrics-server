@@ -21,7 +21,8 @@ pub mod reader_grpc {
     tonic::include_proto!("reader");
 }
 
-const DEFAULT_PORT: u16 = 8000;
+const DEFAULT_HTTP_PORT: u16 = 8000;
+const DEFAULT_GRPC_PORT: u16 = 8888;
 
 #[tokio::main]
 async fn main() {
@@ -38,10 +39,10 @@ async fn main() {
     let http_port = if let Ok(result) = std::env::var("HTTP_PORT") {
         match result.parse() {
             Ok(port) => port,
-            Err(_) => DEFAULT_PORT,
+            Err(_) => DEFAULT_HTTP_PORT,
         }
     } else {
-        DEFAULT_PORT
+        DEFAULT_HTTP_PORT
     };
 
     let mut http_server = http::start_up::setup_server(&app, http_port);
@@ -69,6 +70,15 @@ async fn main() {
 
     http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
-    grpc_server::start(&app, 8888);
+    let grpc_port = if let Ok(result) = std::env::var("GRPC_PORT") {
+        match result.parse() {
+            Ok(port) => port,
+            Err(_) => DEFAULT_GRPC_PORT,
+        }
+    } else {
+        DEFAULT_GRPC_PORT
+    };
+
+    grpc_server::start(&app, grpc_port);
     app.app_states.wait_until_shutdown().await;
 }
