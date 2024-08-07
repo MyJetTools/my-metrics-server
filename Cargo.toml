@@ -21,7 +21,7 @@ my-logger = { tag = "1.1.0", git = "https://github.com/MyJetTools/my-logger.git"
 #    "macros",
 #] }
 
-my-sqlite = { tag = "0.1.0", git = "https://github.com/MyJetTools/my-sqlite.git", features = [
+my-sqlite = { tag = "0.1.1", git = "https://github.com/MyJetTools/my-sqlite.git", features = [
     "macros",
 ] }
 
