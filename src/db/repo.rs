@@ -52,6 +52,7 @@ impl MetricsRepo {
         by_hour_key
     }
     pub async fn get_by_process_id(&self, process_id: i64) -> Vec<MetricDto> {
+        println!("Requested get_by_process_id process_id: {}", process_id);
         let where_model = WhereByProcessId { id: process_id };
         let mut sw = StopWatch::new();
         sw.start();
@@ -72,6 +73,10 @@ impl MetricsRepo {
     }
 
     pub async fn get_by_service_name(&self, service_name: &str, data: &str) -> Vec<MetricDto> {
+        println!(
+            "Requested get_by_service_name for: {} with data: {}",
+            service_name, data
+        );
         let where_model = WhereByServiceName {
             name: service_name,
             data,
