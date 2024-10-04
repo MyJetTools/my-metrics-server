@@ -21,16 +21,16 @@ impl EventsLoopTick<()> for MetricsWriter {
 
     async fn tick(&self, _: ()) {
         while let Some(events_to_write) = self.app.to_write_queue.get_events_to_write(1000).await {
-            let events_amount = events_to_write.len();
+            //let events_amount = events_to_write.len();
             let mut sw = StopWatch::new();
             sw.start();
             let items = self.app.repo.insert(events_to_write).await;
             sw.pause();
-            println!(
-                "MetricsWriter written {} metrics in: {:?}",
-                events_amount,
-                sw.duration()
-            );
+            //  println!(
+            //      "MetricsWriter written {} metrics in: {:?}",
+            //      events_amount,
+            //       sw.duration()
+            //  );
 
             let mut write_access = self.app.metrics_cache.lock().await;
 
