@@ -31,7 +31,7 @@ impl SettingsReader {
         IgnoreEvents::new(read_access.ignore_events.clone())
     }
 
-    pub async fn get_db_file_name(&self, file_name: &str) -> String {
+    pub async fn get_db_file_prefix(&self, file_name: &str) -> String {
         let read_access = self.settings.read().await;
 
         let mut result = if read_access.db_path.starts_with("~") {

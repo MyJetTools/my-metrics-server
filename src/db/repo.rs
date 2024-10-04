@@ -1,46 +1,66 @@
-use my_sqlite::{SqlLiteConnection, SqlLiteConnectionBuilder};
-use rust_extensions::{date_time::DateTimeAsMicroseconds, StopWatch};
+use std::collections::BTreeMap;
 
-use super::dto::*;
+use rust_extensions::{
+    date_time::{DateTimeAsMicroseconds, HourKey},
+    StopWatch,
+};
 
-const TABLE_NAME: &'static str = "metrics";
+use super::{dto::*, SqlLitePool};
+
+pub const TABLE_NAME: &'static str = "metrics";
 
 //const PK_NAME: &'static str = "metrics_pk";
 
-pub struct MetricsPostgresRepo {
-    connection: SqlLiteConnection,
+pub struct MetricsRepo {
+    pool: SqlLitePool,
 }
 
-impl MetricsPostgresRepo {
+impl MetricsRepo {
     pub async fn new(file_name: String) -> Self {
         Self {
-            connection: SqlLiteConnectionBuilder::new(file_name)
-                .create_table_if_no_exists::<MetricDto>(TABLE_NAME)
-                .build()
-                .await
-                .unwrap(),
+            pool: SqlLitePool::new(file_name),
         }
     }
 
-    pub async fn insert(&self, dto_s: &[MetricDto]) {
-        let result = self
-            .connection
-            .bulk_insert_db_entities_if_not_exists(dto_s, TABLE_NAME)
-            .await;
+    pub async fn insert(&self, dto_s: Vec<MetricDto>) -> BTreeMap<HourKey, Vec<MetricDto>> {
+        let mut by_hour_key = BTreeMap::new();
 
-        if let Err(err) = result {
-            println!("Failed to write metrics to postgres: {:?}", err);
+        for dto in dto_s {
+            let hour_key: HourKey = dto.started.into();
+
+            if !by_hour_key.contains_key(&hour_key) {
+                by_hour_key.insert(hour_key, Vec::new());
+            }
+
+            by_hour_key.get_mut(&hour_key).unwrap().push(dto);
         }
+
+        for (hour_key, items) in &by_hour_key {
+            let connection = self.pool.get_for_write_access(*hour_key).await;
+
+            let result = connection
+                .bulk_insert_db_entities_if_not_exists(&items, TABLE_NAME)
+                .await;
+
+            if let Err(err) = result {
+                println!("Failed to write metrics to db: {:?}", err);
+            }
+        }
+
+        by_hour_key
     }
     pub async fn get_by_process_id(&self, process_id: i64) -> Vec<MetricDto> {
         let where_model = WhereByProcessId { id: process_id };
         let mut sw = StopWatch::new();
         sw.start();
-        let result = self
-            .connection
-            .query_rows(TABLE_NAME, Some(&where_model))
-            .await
-            .unwrap();
+
+        let result = if let Some(last) = self.pool.get_last().await {
+            last.query_rows(TABLE_NAME, Some(&where_model))
+                .await
+                .unwrap()
+        } else {
+            vec![]
+        };
 
         sw.pause();
 
@@ -59,11 +79,13 @@ impl MetricsPostgresRepo {
         let mut sw = StopWatch::new();
         sw.start();
 
-        let result = self
-            .connection
-            .query_rows(TABLE_NAME, Some(&where_model))
-            .await
-            .unwrap();
+        let result = if let Some(last) = self.pool.get_last().await {
+            last.query_rows(TABLE_NAME, Some(&where_model))
+                .await
+                .unwrap()
+        } else {
+            vec![]
+        };
 
         sw.pause();
 
@@ -136,13 +158,6 @@ impl MetricsPostgresRepo {
        }
     */
     pub async fn gc(&self, from: DateTimeAsMicroseconds) {
-        let where_model = GcWhereModel {
-            id: from.unix_microseconds,
-        };
-
-        self.connection
-            .delete_db_entity(TABLE_NAME, &where_model)
-            .await
-            .unwrap();
+        self.pool.gc(from).await;
     }
 }
