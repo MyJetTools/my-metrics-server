@@ -27,7 +27,7 @@ impl AppContext {
         settings_reader: Arc<SettingsReader>,
         events_loop_publisher: EventsLoopPublisher<()>,
     ) -> AppContext {
-        let repo_file_name = settings_reader.get_db_file_prefix("metrics-").await;
+        let repo_file_name = settings_reader.get_db_file_prefix("metrics").await;
         let statistic_db_file_name = settings_reader.get_db_file_prefix("statistics.db").await;
 
         AppContext {
