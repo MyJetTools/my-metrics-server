@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rust_extensions::MyTimerTick;
 
-use crate::{app_ctx::AppContext, postgres::dto::StatisticsDto};
+use crate::{app_ctx::AppContext, db::dto::StatisticsDto};
 
 pub struct SaveStatisticsTimer {
     app: Arc<AppContext>,
@@ -35,7 +35,7 @@ impl MyTimerTick for SaveStatisticsTimer {
                 for (hour, data) in data {
                     dto_to_insert.push(StatisticsDto {
                         service: service_name.to_string(),
-                        data_hashed: crate::postgres::data_hashed::calc(action_name),
+                        data_hashed: crate::db::data_hashed::calc(action_name),
                         date: *hour,
                         data: action_name.to_string(),
                         max: data.max,

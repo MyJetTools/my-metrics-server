@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::postgres::dto::*;
+use crate::db::dto::*;
 use crate::writer_grpc::telemetry_writer_server::TelemetryWriter;
 use crate::writer_grpc::*;
 

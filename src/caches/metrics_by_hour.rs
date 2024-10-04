@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
-use crate::postgres::dto::{MetricDto, StatisticsDto};
+use crate::db::dto::{MetricDto, StatisticsDto};
 
 #[derive(Clone)]
 pub struct MetricByHour {

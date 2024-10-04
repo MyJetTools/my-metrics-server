@@ -1,5 +1,5 @@
 use crate::{
-    postgres::dto::{EventTagDto, MetricDto},
+    db::dto::{EventTagDto, MetricDto},
     writer_grpc::*,
 };
 

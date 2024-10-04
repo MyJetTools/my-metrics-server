@@ -1,6 +1,6 @@
 use crate::{
     caches::AggregatedMetricsByServiceCache,
-    postgres::{MetricsPostgresRepo, StatisticsRepo},
+    db::{MetricsPostgresRepo, StatisticsRepo},
     settings::SettingsReader,
 };
 use rust_extensions::{events_loop::EventsLoopPublisher, AppStates};

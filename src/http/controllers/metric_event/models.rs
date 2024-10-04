@@ -2,8 +2,8 @@ use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
 use my_http_server::HttpFailResult;
 use serde::{Deserialize, Serialize};
 
+use crate::db::dto::{EventTagDto, MetricDto};
 use crate::ignore_events::IgnoreEvents;
-use crate::postgres::dto::{EventTagDto, MetricDto};
 
 #[derive(MyHttpInput)]
 pub struct NewMetricsEvent {

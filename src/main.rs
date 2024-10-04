@@ -6,11 +6,11 @@ use rust_extensions::{events_loop::EventsLoop, MyTimer};
 mod app_ctx;
 mod background;
 mod caches;
+mod db;
 mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
-mod postgres;
 mod settings;
 
 pub mod writer_grpc {
