@@ -4,21 +4,22 @@ use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity, Debug)]
 pub struct MetricDto {
-    #[primary_key(0)]
     #[generate_where_model("WhereByProcessId")]
     #[generate_where_model(name:"GcWhereModel", operator = "<")]
     #[order_by_desc]
+    #[db_index(id:0, index_name:"process_id_idx", is_unique:false, order:"ASC")]
     pub id: i64,
-    #[primary_key(1)]
+
     #[db_index(id:0, index_name:"started_idx", is_unique:false, order:"ASC")]
     #[generate_where_model(name:"FromStartedWhereModel", operator = ">")]
     #[generate_where_model(name:"FromStartedAndServiceNameWhereModel", operator = ">")]
+    #[primary_key(2)]
     pub started: i64,
     pub duration_micro: i64,
-    #[primary_key(2)]
-    #[db_index(id:0, index_name:"name_idx", is_unique:false, order:"ASC")]
+    #[primary_key(0)]
     #[generate_where_model(name:"FromStartedAndServiceNameWhereModel", as_str)]
     pub name: String,
+    #[primary_key(1)]
     pub data: String,
     pub success: Option<String>,
     pub fail: Option<String>,
