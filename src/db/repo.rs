@@ -26,7 +26,8 @@ impl MetricsRepo {
         let mut by_hour_key = BTreeMap::new();
 
         for dto in dto_s {
-            let hour_key: HourKey = dto.started.into();
+            let dt = DateTimeAsMicroseconds::from(dto.started);
+            let hour_key: HourKey = dt.into();
 
             if !by_hour_key.contains_key(&hour_key) {
                 by_hour_key.insert(hour_key, Vec::new());
