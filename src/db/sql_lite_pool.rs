@@ -8,7 +8,7 @@ use super::dto::MetricDto;
 
 pub struct SqlLitePoolItem {
     pub last_access: DateTimeAsMicroseconds,
-    pub connection: Arc<SqlLiteConnection>,
+    pub connection: Arc<Mutex<SqlLiteConnection>>,
     pub file_name: String,
 }
 
@@ -22,7 +22,7 @@ impl SqlLitePoolItem {
 
         Self {
             last_access: DateTimeAsMicroseconds::now(),
-            connection: Arc::new(connection),
+            connection: Arc::new(Mutex::new(connection)),
             file_name,
         }
     }
@@ -41,11 +41,15 @@ impl SqlLitePool {
         }
     }
 
-    pub async fn get_for_read_access(&self, hour_key: HourKey) -> Option<Arc<SqlLiteConnection>> {
+    pub async fn get_for_read_access(
+        &self,
+        hour_key: HourKey,
+    ) -> Option<Arc<Mutex<SqlLiteConnection>>> {
         let mut write_access = self.pool.lock().await;
 
         if let Some(pool_item) = write_access.get_mut(&hour_key) {
             pool_item.last_access = DateTimeAsMicroseconds::now();
+
             return Some(pool_item.connection.clone());
         }
 
@@ -65,7 +69,7 @@ impl SqlLitePool {
         Some(result)
     }
 
-    pub async fn get_for_write_access(&self, hour_key: HourKey) -> Arc<SqlLiteConnection> {
+    pub async fn get_for_write_access(&self, hour_key: HourKey) -> Arc<Mutex<SqlLiteConnection>> {
         let mut write_access = self.pool.lock().await;
 
         if let Some(pool_item) = write_access.get_mut(&hour_key) {
@@ -83,7 +87,7 @@ impl SqlLitePool {
         result
     }
 
-    pub async fn get_last(&self) -> Option<Arc<SqlLiteConnection>> {
+    pub async fn get_last(&self) -> Option<Arc<Mutex<SqlLiteConnection>>> {
         let mut write_access = self.pool.lock().await;
         if let Some((_, itm)) = write_access.iter_mut().last() {
             itm.last_access = DateTimeAsMicroseconds::now();
@@ -92,7 +96,7 @@ impl SqlLitePool {
         None
     }
 
-    pub async fn get_all(&self) -> Vec<Arc<SqlLiteConnection>> {
+    pub async fn get_all(&self) -> Vec<Arc<Mutex<SqlLiteConnection>>> {
         let mut result = Vec::new();
         let write_access = self.pool.lock().await;
         for (_, item) in write_access.iter() {

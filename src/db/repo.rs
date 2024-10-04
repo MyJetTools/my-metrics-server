@@ -40,6 +40,7 @@ impl MetricsRepo {
             println!("Inserting {} metrics for hour: {:?}", items.len(), hour_key);
             let connection = self.pool.get_for_write_access(*hour_key).await;
 
+            let connection = connection.lock().await;
             let result = connection
                 .bulk_insert_db_entities_if_not_exists(&items, TABLE_NAME)
                 .await;
@@ -58,7 +59,9 @@ impl MetricsRepo {
         sw.start();
 
         let result = if let Some(last) = self.pool.get_last().await {
-            last.query_rows(TABLE_NAME, Some(&where_model))
+            let connection = last.lock().await;
+            connection
+                .query_rows(TABLE_NAME, Some(&where_model))
                 .await
                 .unwrap()
         } else {
@@ -87,7 +90,9 @@ impl MetricsRepo {
         sw.start();
 
         let result = if let Some(last) = self.pool.get_last().await {
-            last.query_rows(TABLE_NAME, Some(&where_model))
+            let connection = last.lock().await;
+            connection
+                .query_rows(TABLE_NAME, Some(&where_model))
                 .await
                 .unwrap()
         } else {
