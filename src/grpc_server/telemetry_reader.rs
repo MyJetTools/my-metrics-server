@@ -5,7 +5,7 @@ use crate::reader_grpc::*;
 
 use super::server::GrpcService;
 use futures_core::Stream;
-use rust_extensions::date_time::DateTimeAsMicroseconds;
+use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 
 #[tonic::async_trait]
 impl TelemetryReader for GrpcService {
@@ -17,16 +17,15 @@ impl TelemetryReader for GrpcService {
         &self,
         _request: tonic::Request<()>,
     ) -> Result<tonic::Response<Self::GetAppsStream>, tonic::Status> {
-        let mut from = DateTimeAsMicroseconds::now();
+        let now = DateTimeAsMicroseconds::now();
+        let hour_key: IntervalKey<HourKey> = now.into();
 
-        from.add_days(-1);
-
-        let overview = self.app.statistics_repo.get_aggregated_statistics().await;
+        let overview = self.app.hour_statistics_repo.get(hour_key).await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(overview.into_iter(), |dto| {
             ServiceGrpcModel {
-                id: dto.service,
-                avg: dto.avg,
+                id: dto.app,
+                avg: dto.duration_micros / dto.amount,
                 amount: dto.amount,
             }
         })

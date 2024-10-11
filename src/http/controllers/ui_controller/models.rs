@@ -1,7 +1,7 @@
 use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
 use serde::{Deserialize, Serialize};
 
-use crate::db::dto::MetricDto;
+use crate::db::*;
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServicesResponse {

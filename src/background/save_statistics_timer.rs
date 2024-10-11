@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use rust_extensions::MyTimerTick;
 
-use crate::{app_ctx::AppContext, db::dto::StatisticsDto};
+use crate::app_ctx::AppContext;
 
 pub struct SaveStatisticsTimer {
     app: Arc<AppContext>,
@@ -17,44 +17,24 @@ impl SaveStatisticsTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for SaveStatisticsTimer {
     async fn tick(&self) {
-        let metrics_to_save = {
-            let metrics_access = self.app.metrics_cache.lock().await;
-            metrics_access.get_metrics_to_save()
+        let (app_data_metrics, app_hour_metrics) = {
+            let mut metrics_access = self.app.cache.lock().await;
+
+            let app_data_metrics = metrics_access
+                .aggregated_metrics_cache
+                .get_metrics_to_save();
+
+            let app_hour_metrics = metrics_access.event_amount_by_hours.get_to_persist();
+
+            (app_data_metrics, app_hour_metrics)
         };
 
-        if metrics_to_save.is_none() {
-            return;
+        if let Some(app_data_metrics) = app_data_metrics {
+            crate::scripts::write_hour_app_data_statistics(&self.app, app_data_metrics).await;
         }
 
-        let metrics_to_save = metrics_to_save.unwrap();
-
-        let mut dto_to_insert = Vec::new();
-
-        for (service_name, data) in metrics_to_save.iter() {
-            for (action_name, data) in data {
-                for (hour, data) in data {
-                    dto_to_insert.push(StatisticsDto {
-                        service: service_name.to_string(),
-                        data_hashed: crate::db::data_hashed::calc(action_name),
-                        date: *hour,
-                        data: action_name.to_string(),
-                        max: data.max,
-                        min: data.min,
-                        errors_amount: data.errors_amount,
-                        success_amount: data.success_amount,
-                        sum_of_duration: data.sum_of_duration,
-                        amount: data.amount,
-                    })
-                }
-            }
+        if let Some(app_hour_metrics) = app_hour_metrics {
+            crate::scripts::write_hour_statistics_to_db(&self.app, app_hour_metrics).await;
         }
-
-        self.app
-            .statistics_repo
-            .update_metrics(&dto_to_insert)
-            .await;
-
-        let mut metrics_access = self.app.metrics_cache.lock().await;
-        metrics_access.confirm_metrics_saved(&metrics_to_save);
     }
 }

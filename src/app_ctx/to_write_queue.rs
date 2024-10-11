@@ -3,11 +3,10 @@ use std::collections::VecDeque;
 use rust_extensions::events_loop::EventsLoopPublisher;
 use tokio::sync::Mutex;
 
-use crate::db::dto::MetricDto;
+use crate::db::MetricDto;
 
 pub struct ToWriteQueue {
     pub metrics: Mutex<VecDeque<MetricDto>>,
-
     pub events_loop: EventsLoopPublisher<()>,
 }
 

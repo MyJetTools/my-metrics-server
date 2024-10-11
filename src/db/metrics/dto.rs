@@ -1,5 +1,4 @@
 use my_sqlite::macros::*;
-use my_sqlite::GroupByAvg;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity, Debug)]
@@ -44,31 +43,6 @@ pub struct WhereByServiceName<'s> {
     pub data: &'s str,
     #[limit]
     pub limit: usize,
-}
-
-#[derive(SelectDbEntity)]
-pub struct ServiceDto {
-    #[group_by]
-    pub name: String,
-
-    #[db_column_name("duration_micro")]
-    pub avg: GroupByAvg<i64>,
-}
-
-#[derive(Debug)]
-pub struct ServiceOverviewDto {
-    pub data: String,
-    pub min: i64,
-    pub max: i64,
-    pub avg: i64,
-    pub success: usize,
-    pub fail: usize,
-    pub total: usize,
-}
-
-#[derive(SelectDbEntity)]
-pub struct CountSelectDto {
-    pub count: i32,
 }
 
 pub fn round_by_hour(micro_seconds: i64) -> i64 {

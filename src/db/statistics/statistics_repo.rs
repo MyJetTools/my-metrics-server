@@ -111,7 +111,7 @@ impl StatisticsRepo {
     pub async fn restore(&self, service: &str, data: &str, rounded_hour: i64) -> StatisticsDto {
         let where_model = WhereByHourModel {
             service: service.to_string(),
-            data_hashed: super::data_hashed::calc(data),
+            data_hashed: super::super::data_hashed::calc(data),
             date: rounded_hour,
         };
 
@@ -125,7 +125,7 @@ impl StatisticsRepo {
             Some(result) => result,
             None => StatisticsDto {
                 service: service.to_string(),
-                data_hashed: super::data_hashed::calc(data),
+                data_hashed: super::super::data_hashed::calc(data),
                 data: data.to_string(),
                 date: rounded_hour,
                 max: 0,

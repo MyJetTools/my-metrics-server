@@ -32,11 +32,18 @@ impl EventsLoopTick<()> for MetricsWriter {
             //       sw.duration()
             //  );
 
-            let mut write_access = self.app.metrics_cache.lock().await;
+            let mut cache_write_access = self.app.cache.lock().await;
 
-            for (_, grouped) in &items {
+            for (interval_key, grouped) in &items {
                 for metric_dto in grouped {
-                    if let Some(to_update) = write_access.get_to_update(metric_dto) {
+                    cache_write_access
+                        .event_amount_by_hours
+                        .inc(*interval_key, metric_dto);
+
+                    if let Some(to_update) = cache_write_access
+                        .aggregated_metrics_cache
+                        .get_to_update(metric_dto)
+                    {
                         to_update.update(metric_dto);
                         continue;
                     }
@@ -53,7 +60,7 @@ impl EventsLoopTick<()> for MetricsWriter {
 
                     restored.update(metric_dto);
 
-                    write_access.restore(
+                    cache_write_access.aggregated_metrics_cache.restore(
                         &metric_dto.name,
                         &metric_dto.data,
                         rounded_hour,

@@ -7,10 +7,12 @@ mod app_ctx;
 mod background;
 mod caches;
 mod db;
+mod events_amount_by_hour;
 mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
+mod scripts;
 mod settings;
 
 pub mod writer_grpc {

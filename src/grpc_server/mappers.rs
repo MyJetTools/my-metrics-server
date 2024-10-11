@@ -1,5 +1,5 @@
 use crate::{
-    db::dto::{EventTagDto, MetricDto},
+    db::{EventTagDto, MetricDto},
     writer_grpc::*,
 };
 

@@ -1,11 +1,13 @@
 use std::collections::BTreeMap;
 
 use rust_extensions::{
-    date_time::{DateTimeAsMicroseconds, HourKey},
+    date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey},
     StopWatch,
 };
 
-use super::{dto::*, SqlLitePool};
+use crate::db::metrics::dto::*;
+
+use super::SqlLitePool;
 
 pub const TABLE_NAME: &'static str = "metrics";
 
@@ -22,12 +24,15 @@ impl MetricsRepo {
         }
     }
 
-    pub async fn insert(&self, dto_s: Vec<MetricDto>) -> BTreeMap<HourKey, Vec<MetricDto>> {
+    pub async fn insert(
+        &self,
+        dto_s: Vec<MetricDto>,
+    ) -> BTreeMap<IntervalKey<HourKey>, Vec<MetricDto>> {
         let mut by_hour_key = BTreeMap::new();
 
         for dto in dto_s {
             let dt = DateTimeAsMicroseconds::from(dto.started);
-            let hour_key: HourKey = dt.into();
+            let hour_key: IntervalKey<HourKey> = dt.into();
 
             if !by_hour_key.contains_key(&hour_key) {
                 by_hour_key.insert(hour_key, Vec::new());
@@ -106,69 +111,6 @@ impl MetricsRepo {
         result
     }
 
-    /*
-          pub async fn get_services(&self, from: DateTimeAsMicroseconds) -> Vec<ServiceDto> {
-              let where_model = FromStartedWhereModel {
-                  started: from.unix_microseconds,
-              };
-
-              let mut sw = StopWatch::new();
-              sw.start();
-
-              let result = self
-                  .postgres_read
-                  .query_rows(TABLE_NAME, Some(&where_model))
-                  .await
-                  .unwrap();
-
-              sw.pause();
-
-              println!("get_services finished in: {:?}", sw.duration());
-
-              result
-          }
-
-
-       pub async fn get_service_overview(
-           &self,
-           service_name: &str,
-           from: DateTimeAsMicroseconds,
-       ) -> Vec<ServiceOverviewDto> {
-           let where_model = FromStartedAndServiceNameWhereModel {
-               started: from.unix_microseconds,
-               name: service_name,
-           };
-
-           let mut sw = StopWatch::new();
-           sw.start();
-
-           let metrics: Vec<MetricDto> = self
-               .postgres_read
-               .query_rows(TABLE_NAME, Some(&where_model))
-               .await
-               .unwrap();
-
-           sw.pause();
-
-           println!("get_service_overview finished in: {:?}", sw.duration());
-
-           ServiceOverviewDto::from_metric_dto(metrics)
-       }
-
-       pub async fn get_events_amount(&self) -> usize {
-           let result: Option<usize> = self
-               .postgres_read
-               .get_count(TABLE_NAME, NoneWhereModel::new())
-               .await
-               .unwrap();
-
-           if result.is_none() {
-               return 0;
-           }
-
-           result.unwrap()
-       }
-    */
     pub async fn gc(&self, from: DateTimeAsMicroseconds) {
         self.pool.gc(from).await;
     }

@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use my_sqlite::{SqlLiteConnection, SqlLiteConnectionBuilder};
-use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey};
+use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 use tokio::sync::Mutex;
 
 use super::dto::MetricDto;
@@ -15,7 +15,7 @@ pub struct SqlLitePoolItem {
 impl SqlLitePoolItem {
     pub async fn new(file_name: String) -> Self {
         let connection = SqlLiteConnectionBuilder::new(file_name.to_string())
-            .create_table_if_no_exists::<MetricDto>(super::repo::TABLE_NAME)
+            .create_table_if_no_exists::<MetricDto>(super::TABLE_NAME)
             .build()
             .await
             .unwrap();
@@ -30,7 +30,7 @@ impl SqlLitePoolItem {
 
 pub struct SqlLitePool {
     file_name_prefix: String,
-    pool: Mutex<BTreeMap<HourKey, SqlLitePoolItem>>,
+    pool: Mutex<BTreeMap<IntervalKey<HourKey>, SqlLitePoolItem>>,
 }
 
 impl SqlLitePool {
@@ -43,7 +43,7 @@ impl SqlLitePool {
 
     pub async fn get_for_read_access(
         &self,
-        hour_key: HourKey,
+        hour_key: IntervalKey<HourKey>,
     ) -> Option<Arc<Mutex<SqlLiteConnection>>> {
         let mut write_access = self.pool.lock().await;
 
@@ -69,7 +69,10 @@ impl SqlLitePool {
         Some(result)
     }
 
-    pub async fn get_for_write_access(&self, hour_key: HourKey) -> Arc<Mutex<SqlLiteConnection>> {
+    pub async fn get_for_write_access(
+        &self,
+        hour_key: IntervalKey<HourKey>,
+    ) -> Arc<Mutex<SqlLiteConnection>> {
         let mut write_access = self.pool.lock().await;
 
         if let Some(pool_item) = write_access.get_mut(&hour_key) {
@@ -106,7 +109,7 @@ impl SqlLitePool {
     }
 
     pub async fn gc(&self, from_dt: DateTimeAsMicroseconds) {
-        let from_hour_key: HourKey = from_dt.into();
+        let from_hour_key: IntervalKey<HourKey> = from_dt.into();
 
         let mut write_access = self.pool.lock().await;
 
@@ -133,6 +136,6 @@ impl SqlLitePool {
     }
 }
 
-fn compile_file_name(file_name_prefix: &str, hour_key: HourKey) -> String {
-    format!("{}-{}.db", file_name_prefix, hour_key.to_u32())
+fn compile_file_name(file_name_prefix: &str, hour_key: IntervalKey<HourKey>) -> String {
+    format!("{}-{}.db", file_name_prefix, hour_key.to_i64())
 }

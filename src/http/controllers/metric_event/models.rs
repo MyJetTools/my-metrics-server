@@ -2,7 +2,7 @@ use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
 use my_http_server::HttpFailResult;
 use serde::{Deserialize, Serialize};
 
-use crate::db::dto::{EventTagDto, MetricDto};
+use crate::db::*;
 use crate::ignore_events::IgnoreEvents;
 
 #[derive(MyHttpInput)]
