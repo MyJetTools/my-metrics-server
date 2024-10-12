@@ -1,7 +1,4 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
+use std::sync::Arc;
 
 use rust_extensions::{events_loop::EventsLoopTick, StopWatch};
 
@@ -9,15 +6,11 @@ use crate::app_ctx::AppContext;
 
 pub struct MetricsWriter {
     app: Arc<AppContext>,
-    current_hour_is_restored: AtomicBool,
 }
 
 impl MetricsWriter {
     pub fn new(app: Arc<AppContext>) -> Self {
-        Self {
-            app,
-            current_hour_is_restored: AtomicBool::new(false),
-        }
+        Self { app }
     }
 }
 #[async_trait::async_trait]
@@ -27,10 +20,6 @@ impl EventsLoopTick<()> for MetricsWriter {
     async fn finished(&self) {}
 
     async fn tick(&self, _: ()) {
-        if !self.current_hour_is_restored.load(Ordering::Relaxed) {
-            return;
-        }
-
         while let Some(events_to_write) = self.app.to_write_queue.get_events_to_write(1000).await {
             let events_amount = events_to_write.len();
             let mut sw = StopWatch::new();
