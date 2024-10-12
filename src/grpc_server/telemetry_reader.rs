@@ -1,17 +1,13 @@
-use std::pin::Pin;
-
 use crate::reader_grpc::telemetry_reader_server::TelemetryReader;
 use crate::reader_grpc::*;
 
 use super::server::GrpcService;
-use futures_core::Stream;
+use my_grpc_extensions::server::generate_server_stream;
 use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 
 #[tonic::async_trait]
 impl TelemetryReader for GrpcService {
-    type GetAppsStream = Pin<
-        Box<dyn Stream<Item = Result<ServiceGrpcModel, tonic::Status>> + Send + Sync + 'static>,
-    >;
+    generate_server_stream!(stream_name:"GetAppsStream", item_name:"ServiceGrpcModel");
 
     async fn get_apps(
         &self,
@@ -32,9 +28,7 @@ impl TelemetryReader for GrpcService {
         .await
     }
 
-    type GetAppActionsStream = Pin<
-        Box<dyn Stream<Item = Result<AppActionGrpcModel, tonic::Status>> + Send + Sync + 'static>,
-    >;
+    generate_server_stream!(stream_name:"GetAppActionsStream", item_name:"AppActionGrpcModel");
 
     async fn get_app_actions(
         &self,
@@ -75,9 +69,7 @@ impl TelemetryReader for GrpcService {
         .await
     }
 
-    type GetAppEventsByActionStream = Pin<
-        Box<dyn Stream<Item = Result<AppDataGrpcModel, tonic::Status>> + Send + Sync + 'static>,
-    >;
+    generate_server_stream!(stream_name:"GetAppEventsByActionStream", item_name:"AppDataGrpcModel");
 
     async fn get_app_events_by_action(
         &self,
@@ -121,9 +113,7 @@ impl TelemetryReader for GrpcService {
         .await
     }
 
-    type GetByProcessIdStream = Pin<
-        Box<dyn Stream<Item = Result<MetricEventGrpcModel, tonic::Status>> + Send + Sync + 'static>,
-    >;
+    generate_server_stream!(stream_name:"GetByProcessIdStream", item_name:"MetricEventGrpcModel");
 
     async fn get_by_process_id(
         &self,

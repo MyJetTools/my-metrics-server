@@ -9,6 +9,7 @@ pub struct HourStatisticsRepo {
 }
 impl HourStatisticsRepo {
     pub async fn new(file_name: String) -> Self {
+        println!("Creating HourStatisticsRepo with file_name: {}", file_name);
         Self {
             sqlite: SqlLiteConnectionBuilder::new(file_name)
                 .create_table_if_no_exists::<HourStatisticsDto>(TABLE_NAME)
