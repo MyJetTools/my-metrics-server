@@ -177,6 +177,10 @@ impl EventAmountsByHour {
             to_gc
         };
 
+        if !to_gc.is_empty() {
+            println!("GC amounts_by_hour {:?}", to_gc);
+        }
+
         for hour_key in to_gc {
             self.items.remove(&hour_key);
         }

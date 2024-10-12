@@ -105,6 +105,10 @@ impl StatisticsByHourAndServiceName {
             to_gc
         };
 
+        if !to_gc.is_empty() {
+            println!("GC hour_service_name {:?}", to_gc);
+        }
+
         for hour_key in to_gc {
             self.data.remove(&hour_key);
         }
