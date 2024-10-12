@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use background::{GcMetricsTimer, MetricsWriter, SaveStatisticsTimer};
+use background::{GcTimer, MetricsWriter, SaveStatisticsTimer};
 use rust_extensions::{events_loop::EventsLoop, MyTimer};
 
 mod app_ctx;
@@ -49,10 +49,12 @@ async fn main() {
 
     let mut http_server = http::start_up::setup_server(&app, http_port);
 
+    self::flows::init(&app).await;
+
     let mut gc_timer =
         MyTimer::new_with_execute_timeout(Duration::from_secs(10), Duration::from_secs(60 * 5));
 
-    gc_timer.register_timer("GcTimer", Arc::new(GcMetricsTimer::new(app.clone())));
+    gc_timer.register_timer("GcTimer", Arc::new(GcTimer::new(app.clone())));
 
     gc_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 

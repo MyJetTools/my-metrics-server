@@ -1,4 +1,5 @@
 use my_sqlite::macros::*;
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(TableSchema, InsertDbEntity, SelectDbEntity, Debug)]
@@ -26,8 +27,8 @@ pub struct MetricDto {
 }
 
 impl MetricDto {
-    pub fn get_rounded_hour(&self) -> i64 {
-        round_by_hour(self.started)
+    pub fn get_started(&self) -> DateTimeAsMicroseconds {
+        DateTimeAsMicroseconds::new(self.started)
     }
 }
 
@@ -43,26 +44,4 @@ pub struct WhereByServiceName<'s> {
     pub data: &'s str,
     #[limit]
     pub limit: usize,
-}
-
-pub fn round_by_hour(micro_seconds: i64) -> i64 {
-    micro_seconds - micro_seconds % 3600_000_000
-}
-
-#[cfg(test)]
-mod tests {
-    use rust_extensions::date_time::DateTimeAsMicroseconds;
-
-    use super::round_by_hour;
-
-    #[test]
-    fn test_round_by_hour() {
-        let dt = DateTimeAsMicroseconds::from_str("2015-01-05:12:43.23.123").unwrap();
-
-        let rounded = round_by_hour(dt.unix_microseconds);
-
-        let dest = DateTimeAsMicroseconds::new(rounded);
-
-        assert_eq!(&dest.to_rfc3339()[..19], "2015-01-05T12:00:00");
-    }
 }

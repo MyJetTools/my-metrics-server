@@ -1,38 +1,38 @@
 use std::sync::Arc;
 
-use rust_extensions::{date_time::DateTimeAsMicroseconds, MyTimerTick};
+use rust_extensions::{
+    date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey},
+    MyTimerTick,
+};
 
 use crate::app_ctx::AppContext;
 
-pub struct GcMetricsTimer {
+pub struct GcTimer {
     app: Arc<AppContext>,
 }
 
-impl GcMetricsTimer {
+impl GcTimer {
     pub fn new(app: Arc<AppContext>) -> Self {
         Self { app }
     }
 }
 
 #[async_trait::async_trait]
-impl MyTimerTick for GcMetricsTimer {
+impl MyTimerTick for GcTimer {
     async fn tick(&self) {
-        let duration_before_now = self
-            .app
-            .settings_reader
-            .get_duration_before_now_to_gc()
-            .await;
+        crate::scripts::gc_metrics_pool(&self.app).await;
 
-        let as_seconds = duration_before_now.as_secs() as i64;
+        let mut now = DateTimeAsMicroseconds::now();
+        now.add_hours(-2);
 
-        let mut gc_before = DateTimeAsMicroseconds::now();
+        let hour_key: IntervalKey<HourKey> = now.into();
 
-        gc_before.add_seconds(-as_seconds);
+        let mut cache_access = self.app.cache.lock().await;
 
-        println!("Executing GC from: {}", gc_before.to_rfc3339());
+        cache_access
+            .statistics_by_hour_and_service_name
+            .gc_old_data(hour_key);
 
-        self.app.repo.gc(gc_before).await;
-
-        println!("Executed GC");
+        cache_access.event_amount_by_hours.gc_old_data(hour_key);
     }
 }

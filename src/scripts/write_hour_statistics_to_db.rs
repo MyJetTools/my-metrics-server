@@ -1,20 +1,22 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
+
+use rust_extensions::sorted_vec::SortedVecWithStrKey;
 
 use crate::{app_ctx::AppContext, db::HourStatisticsDto, events_amount_by_hour::StatisticsByHour};
 
 pub async fn write_hour_statistics_to_db(
     app: &AppContext,
-    metrics_to_save: BTreeMap<i64, HashMap<String, StatisticsByHour>>,
+    metrics_to_save: BTreeMap<i64, SortedVecWithStrKey<StatisticsByHour>>,
 ) {
     let mut dto = Vec::new();
 
     for (hour_key, items) in metrics_to_save {
-        for (app, statistics) in items {
+        for item in items.into_vec() {
             dto.push(HourStatisticsDto {
                 hour_key,
-                app,
-                duration_micros: statistics.duration_micros,
-                amount: statistics.amount,
+                app: item.name,
+                duration_micros: item.duration_micros,
+                amount: item.amount,
             });
         }
     }

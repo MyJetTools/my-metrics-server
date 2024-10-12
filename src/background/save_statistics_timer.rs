@@ -21,8 +21,8 @@ impl MyTimerTick for SaveStatisticsTimer {
             let mut metrics_access = self.app.cache.lock().await;
 
             let app_data_metrics = metrics_access
-                .aggregated_metrics_cache
-                .get_metrics_to_save();
+                .statistics_by_hour_and_service_name
+                .get_to_persist();
 
             let app_hour_metrics = metrics_access.event_amount_by_hours.get_to_persist();
 

@@ -36,37 +36,14 @@ impl TelemetryReader for GrpcService {
     ) -> Result<tonic::Response<Self::GetAppActionsStream>, tonic::Status> {
         let request = request.into_inner();
 
-        let result = self
-            .app
-            .statistics_repo
-            .get_aggregated_statistics_of_service(&request.app_id)
-            .await;
+        let result: Vec<AppActionGrpcModel> = crate::flows::get_hour_app_data_statistics(
+            &self.app,
+            DateTimeAsMicroseconds::now().into(),
+            &request.app_id,
+        )
+        .await;
 
-        /*
-        let mut from = DateTimeAsMicroseconds::now();
-
-        from.add_days(-1);
-
-        let dto_data = self
-            .app
-            .repo
-            .get_service_overview(&request.app_id, from)
-            .await;
-
-         */
-
-        my_grpc_extensions::grpc_server::send_vec_to_stream(result.into_iter(), |dto| {
-            AppActionGrpcModel {
-                data: dto.data,
-                min: dto.min,
-                avg: dto.avg,
-                max: dto.max,
-                success: dto.success_amount,
-                error: dto.errors_amount,
-                total: dto.amount,
-            }
-        })
-        .await
+        my_grpc_extensions::grpc_server::send_vec_to_stream(result.into_iter(), |dto| dto).await
     }
 
     generate_server_stream!(stream_name:"GetAppEventsByActionStream", item_name:"AppDataGrpcModel");

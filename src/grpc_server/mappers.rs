@@ -1,5 +1,7 @@
 use crate::{
-    db::{EventTagDto, MetricDto},
+    caches::AppDataHourStatistics,
+    db::{EventTagDto, HourAppDataStatisticsDto, MetricDto},
+    reader_grpc::AppActionGrpcModel,
     writer_grpc::*,
 };
 
@@ -27,6 +29,36 @@ impl Into<MetricDto> for TelemetryGrpcEvent {
             } else {
                 None
             },
+        }
+    }
+}
+
+impl From<AppDataHourStatistics> for AppActionGrpcModel {
+    fn from(value: AppDataHourStatistics) -> Self {
+        let total = value.success_amount + value.errors_amount;
+        Self {
+            data: value.data,
+            min: value.min,
+            avg: value.sum_of_duration / total,
+            max: value.max,
+            success: value.success_amount,
+            error: value.errors_amount,
+            total,
+        }
+    }
+}
+
+impl From<HourAppDataStatisticsDto> for AppActionGrpcModel {
+    fn from(value: HourAppDataStatisticsDto) -> Self {
+        let total = value.success_amount + value.errors_amount;
+        Self {
+            data: value.data,
+            min: value.min,
+            avg: value.sum_of_duration / total,
+            max: value.max,
+            success: value.success_amount,
+            error: value.errors_amount,
+            total,
         }
     }
 }

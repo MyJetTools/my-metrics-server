@@ -1,15 +1,16 @@
 use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 use serde::{Deserialize, Serialize};
 
 use crate::db::*;
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServicesResponse {
-    pub services: Vec<ServiceModel>,
+    pub services: Vec<ServiceHttpModel>,
 }
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
-pub struct ServiceModel {
+pub struct ServiceHttpModel {
     pub id: String,
     pub avg: i64,
     pub amount: i64,
@@ -20,6 +21,9 @@ pub struct ServiceModel {
 pub struct GetServiceMetricsOverview {
     #[http_query(description = "Id of service")]
     pub id: String,
+
+    #[http_query(description = "Hour of the day")]
+    pub date: DateTimeAsMicroseconds,
 }
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]

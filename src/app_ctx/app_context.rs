@@ -1,6 +1,6 @@
 use crate::{
-    caches::AggregatedMetricsByServiceCache,
-    db::{HourStatisticsRepo, MetricsRepo, StatisticsRepo},
+    caches::StatisticsByHourAndServiceName,
+    db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
     events_amount_by_hour::EventAmountsByHour,
     settings::SettingsReader,
 };
@@ -15,18 +15,19 @@ pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 pub struct StatisticsCache {
     pub event_amount_by_hours: EventAmountsByHour,
-    pub aggregated_metrics_cache: AggregatedMetricsByServiceCache,
+    pub statistics_by_hour_and_service_name: StatisticsByHourAndServiceName,
 }
 
 pub struct AppContext {
     pub app_states: Arc<AppStates>,
     pub process_id: String,
     pub repo: MetricsRepo,
-    pub statistics_repo: StatisticsRepo,
+
     pub settings_reader: Arc<SettingsReader>,
     pub to_write_queue: ToWriteQueue,
     pub cache: Mutex<StatisticsCache>,
     pub hour_statistics_repo: HourStatisticsRepo,
+    pub hour_app_data_statistics_repo: HourAppDataStatisticsRepo,
 }
 
 impl AppContext {
@@ -35,7 +36,9 @@ impl AppContext {
         events_loop_publisher: EventsLoopPublisher<()>,
     ) -> AppContext {
         let repo_file_name = settings_reader.get_db_file_prefix("metrics").await;
-        let statistic_db_file_name = settings_reader.get_db_file_prefix("statistics.db").await;
+        let statistic_db_file_name = settings_reader
+            .get_db_file_prefix("h_app_statistics.db")
+            .await;
 
         let h_statistic_db_file_name = settings_reader.get_db_file_prefix("h_statistics.db").await;
 
@@ -44,11 +47,12 @@ impl AppContext {
             app_states: Arc::new(AppStates::create_initialized()),
             process_id: uuid::Uuid::new_v4().to_string(),
             repo: MetricsRepo::new(repo_file_name).await,
-            statistics_repo: StatisticsRepo::new(statistic_db_file_name).await,
+            hour_app_data_statistics_repo: HourAppDataStatisticsRepo::new(statistic_db_file_name)
+                .await,
             settings_reader,
             hour_statistics_repo: HourStatisticsRepo::new(h_statistic_db_file_name).await,
             cache: Mutex::new(StatisticsCache {
-                aggregated_metrics_cache: AggregatedMetricsByServiceCache::new(),
+                statistics_by_hour_and_service_name: StatisticsByHourAndServiceName::new(),
                 event_amount_by_hours: EventAmountsByHour::new(),
             }),
         }

@@ -1,16 +1,23 @@
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 use rust_extensions::{events_loop::EventsLoopTick, StopWatch};
 
-use crate::{app_ctx::AppContext, caches::MetricByHour};
+use crate::app_ctx::AppContext;
 
 pub struct MetricsWriter {
     app: Arc<AppContext>,
+    current_hour_is_restored: AtomicBool,
 }
 
 impl MetricsWriter {
     pub fn new(app: Arc<AppContext>) -> Self {
-        Self { app }
+        Self {
+            app,
+            current_hour_is_restored: AtomicBool::new(false),
+        }
     }
 }
 #[async_trait::async_trait]
@@ -20,6 +27,10 @@ impl EventsLoopTick<()> for MetricsWriter {
     async fn finished(&self) {}
 
     async fn tick(&self, _: ()) {
+        if !self.current_hour_is_restored.load(Ordering::Relaxed) {
+            return;
+        }
+
         while let Some(events_to_write) = self.app.to_write_queue.get_events_to_write(1000).await {
             let events_amount = events_to_write.len();
             let mut sw = StopWatch::new();
@@ -35,37 +46,14 @@ impl EventsLoopTick<()> for MetricsWriter {
             let mut cache_write_access = self.app.cache.lock().await;
 
             for (interval_key, grouped) in &items {
+                cache_write_access
+                    .statistics_by_hour_and_service_name
+                    .update(*interval_key, grouped);
+
                 for metric_dto in grouped {
                     cache_write_access
                         .event_amount_by_hours
                         .inc(*interval_key, metric_dto);
-
-                    if let Some(to_update) = cache_write_access
-                        .aggregated_metrics_cache
-                        .get_to_update(metric_dto)
-                    {
-                        to_update.update(metric_dto);
-                        continue;
-                    }
-
-                    let rounded_hour = metric_dto.get_rounded_hour();
-
-                    let restored = self
-                        .app
-                        .statistics_repo
-                        .restore(&metric_dto.name, &metric_dto.data, rounded_hour)
-                        .await;
-
-                    let mut restored: MetricByHour = restored.into();
-
-                    restored.update(metric_dto);
-
-                    cache_write_access.aggregated_metrics_cache.restore(
-                        &metric_dto.name,
-                        &metric_dto.data,
-                        rounded_hour,
-                        restored,
-                    );
                 }
             }
         }
