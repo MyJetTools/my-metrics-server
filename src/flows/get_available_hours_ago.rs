@@ -22,22 +22,25 @@ pub async fn get_available_hours_ago(app: &AppContext) -> Vec<AvailableFileGrpcM
         }
 
         let path = entry.path();
-        println!("entry: {:?}", path);
-        if entry.path().starts_with(METRICS_FILE_PREFIX) {
-            continue;
-        }
 
-        if let Some(path_as_str) = path.as_os_str().to_str() {
-            let hour_key = get_hour_key(path_as_str);
+        if let Some(file_name) = path.file_name() {
+            if let Some(file_name) = file_name.to_str() {
+                println!("file_name: {}", file_name);
+                if entry.path().starts_with(METRICS_FILE_PREFIX) {
+                    continue;
+                }
 
-            if let Some(hour_key) = hour_key {
-                if let Ok(hour) = hour_key.try_to_date_time() {
-                    let diff = now - hour;
+                let hour_key = get_hour_key(file_name);
 
-                    let hours = diff.get_full_hours();
+                if let Some(hour_key) = hour_key {
+                    if let Ok(hour) = hour_key.try_to_date_time() {
+                        let diff = now - hour;
 
-                    let file_metadata = entry.metadata().await.unwrap();
-                    result.insert(hours, file_metadata.len());
+                        let hours = diff.get_full_hours();
+
+                        let file_metadata = entry.metadata().await.unwrap();
+                        result.insert(hours, file_metadata.len());
+                    }
                 }
             }
         }
