@@ -14,6 +14,8 @@ use super::ToWriteQueue;
 //pub const APP_NAME: &'static str = env!("CARGO_PKG_NAME");
 pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
+pub const METRICS_FILE_PREFIX: &'static str = "metrics";
+
 pub struct StatisticsCache {
     pub event_amount_by_hours: EventAmountsByHour,
     pub statistics_by_hour_and_service_name: StatisticsByHourAndServiceName,
@@ -47,7 +49,9 @@ impl AppContext {
         settings_reader: Arc<SettingsReader>,
         events_loop_publisher: EventsLoopPublisher<()>,
     ) -> AppContext {
-        let repo_file_name = settings_reader.get_db_file_prefix("metrics").await;
+        let repo_file_name = settings_reader
+            .get_db_file_prefix(METRICS_FILE_PREFIX)
+            .await;
         let statistic_db_file_name = settings_reader
             .get_db_file_prefix("h_app_statistics.db")
             .await;

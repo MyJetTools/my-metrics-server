@@ -66,7 +66,14 @@ message GetAppsRequest{
     int64 HourKey = 1;
 }
 
+
+message AvailableFileGrpcModel{
+    int64 HourAgo = 1;
+    uint64 FileSize = 2;
+}
 service TelemetryReader {
+
+    rpc GetAvailableHoursAgo(google.protobuf.Empty) returns (stream AvailableFileGrpcModel);
     rpc GetApps(GetAppsRequest) returns (stream ServiceGrpcModel);
     rpc GetAppActions(GetByAppRequest) returns (stream AppActionGrpcModel);
     rpc GetAppEventsByAction(GetAppEventsByActionRequest) returns (stream AppDataGrpcModel);

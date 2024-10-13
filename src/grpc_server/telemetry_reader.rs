@@ -6,6 +6,18 @@ use my_grpc_extensions::server::generate_server_stream;
 
 #[tonic::async_trait]
 impl TelemetryReader for GrpcService {
+    generate_server_stream!(stream_name:"GetAvailableHoursAgoStream", item_name:"AvailableFileGrpcModel");
+
+    async fn get_available_hours_ago(
+        &self,
+        _request: tonic::Request<()>,
+    ) -> Result<tonic::Response<Self::GetAvailableHoursAgoStream>, tonic::Status> {
+        // let request = request.into_inner();
+        let response = crate::flows::get_available_hours_ago(&self.app).await;
+
+        my_grpc_extensions::grpc_server::send_vec_to_stream(response.into_iter(), |dto| dto).await
+    }
+
     generate_server_stream!(stream_name:"GetAppsStream", item_name:"ServiceGrpcModel");
 
     async fn get_apps(

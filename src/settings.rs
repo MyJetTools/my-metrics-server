@@ -31,6 +31,18 @@ impl SettingsReader {
         IgnoreEvents::new(read_access.ignore_events.clone())
     }
 
+    pub async fn get_db_path(&self) -> String {
+        let read_access = self.settings.read().await;
+
+        let db_path = if read_access.db_path.ends_with(std::path::MAIN_SEPARATOR) {
+            &read_access.db_path[..read_access.db_path.len() - 1]
+        } else {
+            read_access.db_path.as_str()
+        };
+
+        rust_extensions::file_utils::format_path(db_path).to_string()
+    }
+
     pub async fn get_db_file_prefix(&self, file_name: &str) -> String {
         let read_access = self.settings.read().await;
 
@@ -43,7 +55,7 @@ impl SettingsReader {
         };
 
         if !result.ends_with(std::path::MAIN_SEPARATOR) {
-            result.push('/')
+            result.push(std::path::MAIN_SEPARATOR)
         }
 
         result.push_str(file_name);
