@@ -2,6 +2,7 @@ use crate::{
     caches::StatisticsByHourAndServiceName,
     db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
     events_amount_by_hour::EventAmountsByHour,
+    process_id_user_id_links::ProcessIdUserIdLinks,
     settings::SettingsReader,
 };
 use rust_extensions::{events_loop::EventsLoopPublisher, AppStates};
@@ -16,6 +17,17 @@ pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 pub struct StatisticsCache {
     pub event_amount_by_hours: EventAmountsByHour,
     pub statistics_by_hour_and_service_name: StatisticsByHourAndServiceName,
+    pub process_id_user_id_links: ProcessIdUserIdLinks,
+}
+
+impl StatisticsCache {
+    pub fn new() -> Self {
+        Self {
+            statistics_by_hour_and_service_name: StatisticsByHourAndServiceName::new(),
+            event_amount_by_hours: EventAmountsByHour::new(),
+            process_id_user_id_links: ProcessIdUserIdLinks::new(),
+        }
+    }
 }
 
 pub struct AppContext {
@@ -51,10 +63,7 @@ impl AppContext {
                 .await,
             settings_reader,
             hour_statistics_repo: HourStatisticsRepo::new(h_statistic_db_file_name).await,
-            cache: Mutex::new(StatisticsCache {
-                statistics_by_hour_and_service_name: StatisticsByHourAndServiceName::new(),
-                event_amount_by_hours: EventAmountsByHour::new(),
-            }),
+            cache: Mutex::new(StatisticsCache::new()),
         }
     }
 }

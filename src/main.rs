@@ -12,6 +12,7 @@ mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
+mod process_id_user_id_links;
 mod scripts;
 mod settings;
 

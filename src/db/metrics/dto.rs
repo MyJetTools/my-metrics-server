@@ -30,6 +30,26 @@ impl MetricDto {
     pub fn get_started(&self) -> DateTimeAsMicroseconds {
         DateTimeAsMicroseconds::new(self.started)
     }
+
+    pub fn get_tag_value(&self, key: &str) -> Option<&str> {
+        let tags = self.tags.as_ref()?;
+
+        for itm in tags {
+            if itm.key == key {
+                return Some(&itm.value);
+            }
+        }
+
+        None
+    }
+
+    pub fn add_tag(&mut self, key: String, value: String) {
+        if let Some(tags) = self.tags.as_mut() {
+            tags.push(EventTagDto { key, value });
+        } else {
+            self.tags = Some(vec![EventTagDto { key, value }]);
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, DbJsonModel, Debug)]
