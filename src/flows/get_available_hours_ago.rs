@@ -25,7 +25,6 @@ pub async fn get_available_hours_ago(app: &AppContext) -> Vec<AvailableFileGrpcM
 
         if let Some(file_name) = path.file_name() {
             if let Some(file_name) = file_name.to_str() {
-                println!("file_name: {}", file_name);
                 if entry.path().starts_with(METRICS_FILE_PREFIX) {
                     continue;
                 }

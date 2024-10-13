@@ -20,6 +20,12 @@ pub async fn get_hour_app_data_statistics<
         return result;
     }
 
+    println!(
+        "Loading statistics for app: {} with hour_key {}",
+        app,
+        hour_key.as_i64_ref()
+    );
+
     let from_db = app_ctx
         .hour_app_data_statistics_repo
         .get_by_app(hour_key, app)

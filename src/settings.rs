@@ -16,10 +16,6 @@ pub struct SettingsModel {
     pub db_path: String,
     #[serde(rename = "RetentionPeriod")]
     pub retention_period: String,
-
-    #[serde(rename = "MinEventsToKeepBeforeGC")]
-    pub min_events_to_keep_before_gc: usize,
-
     #[serde(rename = "IgnoreEvents")]
     pub ignore_events: Vec<IgnoreEvent>,
 }
