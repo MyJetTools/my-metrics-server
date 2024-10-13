@@ -3,7 +3,6 @@ use crate::reader_grpc::*;
 
 use super::server::GrpcService;
 use my_grpc_extensions::server::generate_server_stream;
-use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 
 #[tonic::async_trait]
 impl TelemetryReader for GrpcService {
@@ -11,12 +10,14 @@ impl TelemetryReader for GrpcService {
 
     async fn get_apps(
         &self,
-        _request: tonic::Request<()>,
+        request: tonic::Request<GetAppsRequest>,
     ) -> Result<tonic::Response<Self::GetAppsStream>, tonic::Status> {
-        let now = DateTimeAsMicroseconds::now();
-        let hour_key: IntervalKey<HourKey> = now.into();
-
-        let overview = self.app.hour_statistics_repo.get(hour_key).await;
+        let request = request.into_inner();
+        let overview = self
+            .app
+            .hour_statistics_repo
+            .get(request.hour_key.into())
+            .await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(overview.into_iter(), |dto| {
             ServiceGrpcModel {
@@ -38,7 +39,7 @@ impl TelemetryReader for GrpcService {
 
         let result: Vec<AppActionGrpcModel> = crate::flows::get_hour_app_data_statistics(
             &self.app,
-            DateTimeAsMicroseconds::now().into(),
+            request.hour_key.into(),
             &request.app_id,
         )
         .await;
@@ -53,15 +54,10 @@ impl TelemetryReader for GrpcService {
         request: tonic::Request<GetAppEventsByActionRequest>,
     ) -> Result<tonic::Response<Self::GetAppEventsByActionStream>, tonic::Status> {
         let request = request.into_inner();
-
-        let mut from = DateTimeAsMicroseconds::now();
-
-        from.add_days(-1);
-
         let dto_data = self
             .app
             .repo
-            .get_by_service_name(&request.app_id, &request.data)
+            .get_by_service_name(request.hour_key.into(), &request.app_id, &request.data)
             .await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
@@ -98,11 +94,11 @@ impl TelemetryReader for GrpcService {
     ) -> Result<tonic::Response<Self::GetByProcessIdStream>, tonic::Status> {
         let request = request.into_inner();
 
-        let mut from = DateTimeAsMicroseconds::now();
-
-        from.add_days(-1);
-
-        let dto_data = self.app.repo.get_by_process_id(request.process_id).await;
+        let dto_data = self
+            .app
+            .repo
+            .get_by_process_id(request.hour_key.into(), request.process_id)
+            .await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
             MetricEventGrpcModel {

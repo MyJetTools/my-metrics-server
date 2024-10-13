@@ -41,35 +41,34 @@ impl SqlLitePool {
         }
     }
 
-    /*
-       pub async fn get_for_read_access(
-           &self,
-           hour_key: IntervalKey<HourKey>,
-       ) -> Option<Arc<Mutex<SqlLiteConnection>>> {
-           let mut write_access = self.pool.lock().await;
+    pub async fn get_for_read_access(
+        &self,
+        hour_key: IntervalKey<HourKey>,
+    ) -> Option<Arc<Mutex<SqlLiteConnection>>> {
+        let mut write_access = self.pool.lock().await;
 
-           if let Some(pool_item) = write_access.get_mut(&hour_key) {
-               pool_item.last_access = DateTimeAsMicroseconds::now();
+        if let Some(pool_item) = write_access.get_mut(&hour_key) {
+            pool_item.last_access = DateTimeAsMicroseconds::now();
 
-               return Some(pool_item.connection.clone());
-           }
+            return Some(pool_item.connection.clone());
+        }
 
-           let file_name = compile_file_name(&self.file_name_prefix, hour_key);
+        let file_name = compile_file_name(&self.file_name_prefix, hour_key);
 
-           let file_info = tokio::fs::metadata(&file_name).await;
+        let file_info = tokio::fs::metadata(&file_name).await;
 
-           if file_info.is_err() {
-               return None;
-           }
+        if file_info.is_err() {
+            return None;
+        }
 
-           let item = SqlLitePoolItem::new(file_name).await;
+        let item = SqlLitePoolItem::new(file_name).await;
 
-           let result = item.connection.clone();
-           write_access.insert(hour_key, item);
+        let result = item.connection.clone();
+        write_access.insert(hour_key, item);
 
-           Some(result)
-       }
-    */
+        Some(result)
+    }
+
     pub async fn get_for_write_access(
         &self,
         hour_key: IntervalKey<HourKey>,
@@ -90,7 +89,7 @@ impl SqlLitePool {
 
         result
     }
-
+    /*
     pub async fn get_last(&self) -> Option<Arc<Mutex<SqlLiteConnection>>> {
         let mut write_access = self.pool.lock().await;
         if let Some((_, itm)) = write_access.iter_mut().last() {
@@ -100,7 +99,7 @@ impl SqlLitePool {
         None
     }
 
-    /*
+
        pub async fn get_all(&self) -> Vec<Arc<Mutex<SqlLiteConnection>>> {
            let mut result = Vec::new();
            let write_access = self.pool.lock().await;

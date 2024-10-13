@@ -34,7 +34,7 @@ async fn handle_request(
     let events = action
         .app
         .repo
-        .get_by_process_id(http_input.process_id)
+        .get_by_process_id(http_input.hour_key.into(), http_input.process_id)
         .await;
 
     let mut metrics = Vec::with_capacity(events.len());

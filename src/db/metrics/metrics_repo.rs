@@ -57,13 +57,17 @@ impl MetricsRepo {
 
         by_hour_key
     }
-    pub async fn get_by_process_id(&self, process_id: i64) -> Vec<MetricDto> {
+    pub async fn get_by_process_id(
+        &self,
+        hour_key: IntervalKey<HourKey>,
+        process_id: i64,
+    ) -> Vec<MetricDto> {
         println!("Requested get_by_process_id process_id: {}", process_id);
         let where_model = WhereByProcessId { id: process_id };
         let mut sw = StopWatch::new();
         sw.start();
 
-        let result = if let Some(last) = self.pool.get_last().await {
+        let result = if let Some(last) = self.pool.get_for_read_access(hour_key).await {
             let connection = last.lock().await;
             connection
                 .query_rows(TABLE_NAME, Some(&where_model))
@@ -80,7 +84,12 @@ impl MetricsRepo {
         result
     }
 
-    pub async fn get_by_service_name(&self, service_name: &str, data: &str) -> Vec<MetricDto> {
+    pub async fn get_by_service_name(
+        &self,
+        hour_key: IntervalKey<HourKey>,
+        service_name: &str,
+        data: &str,
+    ) -> Vec<MetricDto> {
         println!(
             "Requested get_by_service_name for: {} with data: {}",
             service_name, data
@@ -94,7 +103,7 @@ impl MetricsRepo {
         let mut sw = StopWatch::new();
         sw.start();
 
-        let result = if let Some(last) = self.pool.get_last().await {
+        let result = if let Some(last) = self.pool.get_for_read_access(hour_key).await {
             let connection = last.lock().await;
             connection
                 .query_rows(TABLE_NAME, Some(&where_model))

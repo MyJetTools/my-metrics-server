@@ -1,8 +1,13 @@
 use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
-use rust_extensions::date_time::DateTimeAsMicroseconds;
 use serde::{Deserialize, Serialize};
 
 use crate::db::*;
+
+#[derive(Debug, MyHttpInput)]
+pub struct GetServicesHttpInput {
+    #[http_query(description = "Hour key")]
+    pub hour_key: i64,
+}
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct GetServicesResponse {
@@ -22,8 +27,8 @@ pub struct GetServiceMetricsOverview {
     #[http_query(description = "Id of service")]
     pub id: String,
 
-    #[http_query(description = "Hour of the day")]
-    pub date: DateTimeAsMicroseconds,
+    #[http_query(description = "Hour key")]
+    pub hour_key: i64,
 }
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
@@ -49,6 +54,8 @@ pub struct GetByServiceDataRequest {
     pub id: String,
     #[http_query(description = "Data of the service")]
     pub data: String,
+    #[http_query(name:"hourKey", description = "Hour Key")]
+    pub hour_key: i64,
 }
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricsResponse {
@@ -86,6 +93,8 @@ impl Into<MetricHttpModel> for MetricDto {
 pub struct GetByProcessIdRequest {
     #[http_query(name: "processId"; description = "Id of service")]
     pub process_id: i64,
+    #[http_query(name: "hour_key"; description = "Hour key")]
+    pub hour_key: i64,
 }
 
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]

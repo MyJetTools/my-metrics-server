@@ -33,7 +33,7 @@ async fn handle_request(
 ) -> Result<HttpOkResult, HttpFailResult> {
     let data = crate::flows::get_hour_app_data_statistics(
         &action.app,
-        input_data.date.into(),
+        input_data.hour_key.into(),
         &input_data.id,
     )
     .await;

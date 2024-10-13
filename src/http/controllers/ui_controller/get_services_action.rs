@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
-use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 use crate::{app_ctx::AppContext, db::HourStatisticsDto, events_amount_by_hour::StatisticsByHour};
 
@@ -13,6 +12,7 @@ use super::models::*;
     controller: "ui",
     description: "Get services overview",
     summary: "Get services overview",
+    input_data:GetServicesHttpInput,
     result:[
         {status_code: 200, description: "List of apps", model="GetServicesResponse"},
     ]
@@ -28,11 +28,11 @@ impl GetServicesAction {
 }
 async fn handle_request(
     action: &GetServicesAction,
+    input_data: GetServicesHttpInput,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
-    let now = DateTimeAsMicroseconds::now();
-
-    let services = crate::flows::get_hour_app_statistics(&action.app, now.into()).await;
+    let services =
+        crate::flows::get_hour_app_statistics(&action.app, input_data.hour_key.into()).await;
 
     let result = GetServicesResponse { services };
 
