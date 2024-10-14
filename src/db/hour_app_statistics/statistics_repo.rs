@@ -22,7 +22,6 @@ impl HourAppDataStatisticsRepo {
     }
 
     pub async fn update_metrics(&self, dto_s: &[HourAppDataStatisticsDto]) {
-        println!("Updating metrics for {:?} records", dto_s);
         self.connection
             .bulk_insert_or_update(dto_s, TABLE_NAME)
             .await
