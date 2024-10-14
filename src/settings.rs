@@ -64,7 +64,7 @@ impl SettingsReader {
         read_access.min_events_to_keep_before_gc
     }
     */
-    pub async fn get_duration_before_now_to_gc(&self) -> Duration {
+    pub async fn get_retention_period(&self) -> Duration {
         let read_access = self.settings.read().await;
         rust_extensions::duration_utils::parse_duration(read_access.retention_period.as_str())
             .unwrap()

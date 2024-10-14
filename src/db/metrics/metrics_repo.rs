@@ -120,7 +120,7 @@ impl MetricsRepo {
         result
     }
 
-    pub async fn gc(&self, from: DateTimeAsMicroseconds) {
-        self.pool.gc(from).await;
+    pub async fn gc(&self, hour_key: IntervalKey<HourKey>) {
+        self.pool.gc_file(hour_key).await;
     }
 }

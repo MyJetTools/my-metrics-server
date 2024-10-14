@@ -20,12 +20,11 @@ impl GcTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for GcTimer {
     async fn tick(&self) {
-        crate::scripts::gc_metrics_pool(&self.app).await;
+        let duration = self.app.settings_reader.get_retention_period().await;
 
-        let mut now = DateTimeAsMicroseconds::now();
-        now.add_hours(-2);
+        let gc_from = DateTimeAsMicroseconds::now().sub(duration);
 
-        let hour_key: IntervalKey<HourKey> = now.into();
+        let hour_key: IntervalKey<HourKey> = gc_from.into();
 
         println!("GC hour is: {}", hour_key.to_i64());
 

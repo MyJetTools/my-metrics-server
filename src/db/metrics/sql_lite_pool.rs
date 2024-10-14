@@ -28,16 +28,22 @@ impl SqlLitePoolItem {
     }
 }
 
+#[derive(Default)]
+pub struct SqlLitePoolSingleThreaded {
+    pool: BTreeMap<IntervalKey<HourKey>, SqlLitePoolItem>,
+    being_deleted: Option<IntervalKey<HourKey>>,
+}
+
 pub struct SqlLitePool {
     file_name_prefix: String,
-    pool: Mutex<BTreeMap<IntervalKey<HourKey>, SqlLitePoolItem>>,
+    pool: Mutex<SqlLitePoolSingleThreaded>,
 }
 
 impl SqlLitePool {
     pub fn new(file_name_prefix: String) -> Self {
         Self {
             file_name_prefix,
-            pool: Mutex::new(BTreeMap::new()),
+            pool: Mutex::new(SqlLitePoolSingleThreaded::default()),
         }
     }
 
@@ -47,7 +53,13 @@ impl SqlLitePool {
     ) -> Option<Arc<Mutex<SqlLiteConnection>>> {
         let mut write_access = self.pool.lock().await;
 
-        if let Some(pool_item) = write_access.get_mut(&hour_key) {
+        if let Some(being_deleted) = write_access.being_deleted {
+            if being_deleted == hour_key {
+                return None;
+            }
+        }
+
+        if let Some(pool_item) = write_access.pool.get_mut(&hour_key) {
             pool_item.last_access = DateTimeAsMicroseconds::now();
 
             return Some(pool_item.connection.clone());
@@ -64,7 +76,7 @@ impl SqlLitePool {
         let item = SqlLitePoolItem::new(file_name).await;
 
         let result = item.connection.clone();
-        write_access.insert(hour_key, item);
+        write_access.pool.insert(hour_key, item);
 
         Some(result)
     }
@@ -75,7 +87,7 @@ impl SqlLitePool {
     ) -> Arc<Mutex<SqlLiteConnection>> {
         let mut write_access = self.pool.lock().await;
 
-        if let Some(pool_item) = write_access.get_mut(&hour_key) {
+        if let Some(pool_item) = write_access.pool.get_mut(&hour_key) {
             pool_item.last_access = DateTimeAsMicroseconds::now();
             return pool_item.connection.clone();
         }
@@ -85,7 +97,7 @@ impl SqlLitePool {
         let item = SqlLitePoolItem::new(file_name).await;
 
         let result = item.connection.clone();
-        write_access.insert(hour_key, item);
+        write_access.pool.insert(hour_key, item);
 
         result
     }
@@ -109,30 +121,17 @@ impl SqlLitePool {
            result
        }
     */
-    pub async fn gc(&self, from_dt: DateTimeAsMicroseconds) {
-        let from_hour_key: IntervalKey<HourKey> = from_dt.into();
-
+    pub async fn gc_file(&self, gc_file: IntervalKey<HourKey>) {
         let mut write_access = self.pool.lock().await;
 
-        let mut to_gc = Vec::new();
-        for key in write_access.keys() {
-            if *key < from_hour_key {
-                to_gc.push(*key);
-            } else {
-                break;
-            }
-        }
+        write_access.being_deleted = Some(gc_file);
 
-        for key in to_gc {
-            let file_name = {
-                let item = write_access.remove(&key);
-
-                item.map(|i| i.file_name)
-            };
-
-            if let Some(file_name) = file_name {
-                tokio::fs::remove_file(file_name).await.unwrap();
-            }
+        if let Some(item) = write_access.pool.remove(&gc_file) {
+            println!(
+                "File {} for hour Key {} is removed from the pool",
+                item.file_name,
+                gc_file.to_i64()
+            );
         }
     }
 }

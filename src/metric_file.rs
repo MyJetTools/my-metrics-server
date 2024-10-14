@@ -2,15 +2,17 @@ use rust_extensions::date_time::{HourKey, IntervalKey};
 
 #[derive(Debug)]
 pub struct MetricFile {
+    file_name_and_path: String,
     file_name: String,
     file_size: u64,
 }
 
 impl MetricFile {
-    pub fn new(file_name: String, file_size: u64) -> Self {
+    pub fn new(file_name_and_path: String, file_name: String, file_size: u64) -> Self {
         Self {
             file_name,
             file_size,
+            file_name_and_path,
         }
     }
     pub fn get_hour_key(&self) -> Option<IntervalKey<HourKey>> {
@@ -26,5 +28,9 @@ impl MetricFile {
 
     pub fn get_file_size(&self) -> u64 {
         self.file_size
+    }
+
+    pub fn get_path_and_file_name(&self) -> &str {
+        &self.file_name_and_path
     }
 }
