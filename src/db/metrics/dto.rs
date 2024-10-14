@@ -43,6 +43,20 @@ impl MetricDto {
         None
     }
 
+    pub fn update_user_id_to_client_id(&mut self, user_id_tag: &str, client_id_tag: &str) {
+        if let Some(tags) = &mut self.tags {
+            let index = tags.iter().position(|x| x.key == user_id_tag);
+
+            if let Some(index) = index {
+                let user_id = tags.remove(index);
+                tags.push(EventTagDto {
+                    key: client_id_tag.to_string(),
+                    value: user_id.value,
+                });
+            }
+        }
+    }
+
     pub fn add_tag(&mut self, key: String, value: String) {
         if let Some(tags) = self.tags.as_mut() {
             tags.push(EventTagDto { key, value });
