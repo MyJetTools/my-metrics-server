@@ -52,7 +52,7 @@ impl AppDataHourStatistics {
             amount: 1,
         }
     }
-    pub fn update(&mut self, itm: &MetricDto) {
+    pub fn update(&mut self, itm: &MetricDto) -> Self {
         if itm.duration_micro < self.min || self.min == 0 {
             self.min = itm.duration_micro;
         }
@@ -71,5 +71,16 @@ impl AppDataHourStatistics {
         if itm.fail.is_some() {
             self.errors_amount += 1;
         }
+
+        self.clone()
+    }
+
+    pub fn update_to_persist(&mut self, itm: &AppDataHourStatistics) {
+        self.max = itm.max;
+        self.min = itm.min;
+        self.errors_amount = itm.errors_amount;
+        self.success_amount = itm.success_amount;
+        self.sum_of_duration = itm.sum_of_duration;
+        self.amount = itm.amount;
     }
 }

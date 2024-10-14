@@ -30,13 +30,44 @@ impl StatisticsByHourAndServiceName {
 
         let sub_items = self.data.get_mut(hour_key.as_i64_ref()).unwrap();
 
+        let mut to_persist = Vec::new();
+
         for itm in events {
             match sub_items.insert_or_update(&itm.name, &itm.data) {
                 InsertOrUpdateEntry2Keys::Insert(entry) => {
-                    entry.insert(AppDataHourStatistics::new(itm));
+                    let itm = AppDataHourStatistics::new(itm);
+                    entry.insert(itm.clone());
+                    to_persist.push(itm);
                 }
                 InsertOrUpdateEntry2Keys::Update(mut entry) => {
-                    entry.get_item_mut().update(itm);
+                    let itm_to_persist = entry.get_item_mut().update(itm);
+                    to_persist.push(itm_to_persist);
+                }
+            }
+        }
+
+        self.set_to_persist(hour_key, to_persist);
+    }
+
+    fn set_to_persist(
+        &mut self,
+        hour_key: IntervalKey<HourKey>,
+        events_to_persist: Vec<AppDataHourStatistics>,
+    ) {
+        if !self.to_persist.contains_key(hour_key.as_i64_ref()) {
+            self.to_persist
+                .insert(hour_key.to_i64(), SortedVecWith2StrKey::new());
+        }
+
+        let sub_items = self.data.get_mut(hour_key.as_i64_ref()).unwrap();
+
+        for itm in events_to_persist {
+            match sub_items.insert_or_update(&itm.service, &itm.data) {
+                InsertOrUpdateEntry2Keys::Insert(entry) => {
+                    entry.insert(itm);
+                }
+                InsertOrUpdateEntry2Keys::Update(mut entry) => {
+                    entry.get_item_mut().update_to_persist(&itm);
                 }
             }
         }
