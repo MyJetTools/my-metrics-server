@@ -20,7 +20,7 @@ impl GcTimer {
 #[async_trait::async_trait]
 impl MyTimerTick for GcTimer {
     async fn tick(&self) {
-        let duration = self.app.settings_reader.get_retention_period().await;
+        let duration = self.app.settings_reader.get_hours_to_gc().await;
 
         let gc_from = DateTimeAsMicroseconds::now().sub(duration);
 

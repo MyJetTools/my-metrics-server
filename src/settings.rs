@@ -14,8 +14,8 @@ pub struct IgnoreEvent {
 pub struct SettingsModel {
     #[serde(rename = "DbPath")]
     pub db_path: String,
-    #[serde(rename = "RetentionPeriod")]
-    pub retention_period: String,
+    #[serde(rename = "HoursToGc")]
+    pub hours_to_gc: i64,
     #[serde(rename = "IgnoreEvents")]
     pub ignore_events: Vec<IgnoreEvent>,
 }
@@ -64,9 +64,8 @@ impl SettingsReader {
         read_access.min_events_to_keep_before_gc
     }
     */
-    pub async fn get_retention_period(&self) -> Duration {
+    pub async fn get_hours_to_gc(&self) -> Duration {
         let read_access = self.settings.read().await;
-        rust_extensions::duration_utils::parse_duration(read_access.retention_period.as_str())
-            .unwrap()
+        Duration::from_secs((read_access.hours_to_gc * 3600) as u64)
     }
 }
