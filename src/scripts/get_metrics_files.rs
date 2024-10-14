@@ -19,7 +19,7 @@ pub async fn get_metrics_files(app: &AppContext) -> Vec<MetricFile> {
 
         if let Some(file_name) = path.file_name() {
             if let Some(file_name) = file_name.to_str() {
-                if entry.path().starts_with(METRICS_FILE_PREFIX) {
+                if file_name.starts_with(METRICS_FILE_PREFIX) {
                     let file_metadata = entry.metadata().await.unwrap();
                     result.push(MetricFile::new(file_name.to_string(), file_metadata.len()));
                 }
