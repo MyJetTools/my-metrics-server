@@ -1,10 +1,9 @@
 use std::{sync::Arc, time::Duration};
 
-use background::{GcTimer, MetricsWriter, SaveStatisticsTimer};
 use rust_extensions::{events_loop::EventsLoop, MyTimer};
+use timers::{GcTimer, MetricsWriter, SaveStatisticsTimer};
 
 mod app_ctx;
-mod background;
 mod caches;
 mod db;
 mod events_amount_by_hour;
@@ -12,9 +11,11 @@ mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
+mod metric_file;
 mod process_id_user_id_links;
 mod scripts;
 mod settings;
+mod timers;
 
 pub mod writer_grpc {
     tonic::include_proto!("writer");

@@ -4,3 +4,7 @@ mod write_hour_app_data_statistics;
 pub use write_hour_app_data_statistics::*;
 mod gc_metrics_pool;
 pub use gc_metrics_pool::*;
+mod get_metrics_files;
+pub use get_metrics_files::*;
+mod gc_files;
+pub use gc_files::*;

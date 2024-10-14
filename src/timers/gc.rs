@@ -27,6 +27,8 @@ impl MyTimerTick for GcTimer {
 
         let hour_key: IntervalKey<HourKey> = now.into();
 
+        crate::scripts::gc_files(&self.app, hour_key).await;
+
         let mut cache_access = self.app.cache.lock().await;
 
         cache_access
