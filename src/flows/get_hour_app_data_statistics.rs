@@ -21,7 +21,7 @@ pub async fn get_hour_app_data_statistics<
     }
 
     println!(
-        "Loading statistics for app: {} with hour_key {}",
+        "Loading statistics from DB for app: {} with hour_key {}",
         app,
         hour_key.as_i64_ref()
     );
