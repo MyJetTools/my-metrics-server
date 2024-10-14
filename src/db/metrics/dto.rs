@@ -6,7 +6,6 @@ use serde_derive::{Deserialize, Serialize};
 pub struct MetricDto {
     #[generate_where_model("WhereByProcessId")]
     #[generate_where_model(name:"GcWhereModel", operator = "<")]
-    #[order_by_desc]
     #[db_index(id:0, index_name:"process_id_idx", is_unique:false, order:"ASC")]
     pub id: i64,
 

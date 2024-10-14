@@ -5,7 +5,7 @@ use crate::app_ctx::AppContext;
 pub async fn gc_files(app: &AppContext, from_hour_key: IntervalKey<HourKey>) {
     let files = super::get_metrics_files(app).await;
 
-    println!("Files: {:?}", files);
+    //println!("Files: {:?}", files);
 
     for file in files {
         if let Some(file_hour_key) = file.get_hour_key() {

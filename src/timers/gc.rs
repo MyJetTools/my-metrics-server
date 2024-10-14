@@ -26,7 +26,7 @@ impl MyTimerTick for GcTimer {
 
         let hour_key: IntervalKey<HourKey> = gc_from.into();
 
-        println!("GC hour is: {}", hour_key.to_i64());
+        //println!("GC hour is: {}", hour_key.to_i64());
 
         crate::scripts::gc_files(&self.app, hour_key).await;
 

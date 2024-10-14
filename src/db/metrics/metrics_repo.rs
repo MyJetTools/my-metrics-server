@@ -103,8 +103,8 @@ impl MetricsRepo {
         let mut sw = StopWatch::new();
         sw.start();
 
-        let result = if let Some(last) = self.pool.get_for_read_access(hour_key).await {
-            let connection = last.lock().await;
+        let result = if let Some(connection) = self.pool.get_for_read_access(hour_key).await {
+            let connection = connection.lock().await;
             connection
                 .query_rows(TABLE_NAME, Some(&where_model))
                 .await
