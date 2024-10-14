@@ -59,7 +59,7 @@ impl StatisticsByHourAndServiceName {
                 .insert(hour_key.to_i64(), SortedVecWith2StrKey::new());
         }
 
-        let sub_items = self.data.get_mut(hour_key.as_i64_ref()).unwrap();
+        let sub_items = self.to_persist.get_mut(hour_key.as_i64_ref()).unwrap();
 
         for itm in events_to_persist {
             match sub_items.insert_or_update(&itm.service, &itm.data) {
