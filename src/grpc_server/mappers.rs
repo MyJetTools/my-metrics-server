@@ -1,7 +1,5 @@
 use crate::{
-    caches::AppDataHourStatistics,
-    db::{EventTagDto, HourAppDataStatisticsDto, MetricDto},
-    reader_grpc::AppActionGrpcModel,
+    caches::AppDataHourStatistics, db::*, events_amount_by_hour::StatisticsByHour, reader_grpc::*,
     writer_grpc::*,
 };
 
@@ -59,6 +57,26 @@ impl From<HourAppDataStatisticsDto> for AppActionGrpcModel {
             success: value.success_amount,
             error: value.errors_amount,
             total,
+        }
+    }
+}
+
+impl From<StatisticsByHour> for ServiceGrpcModel {
+    fn from(value: StatisticsByHour) -> Self {
+        Self {
+            id: value.name,
+            avg: value.duration_micros / value.amount,
+            amount: value.amount,
+        }
+    }
+}
+
+impl From<HourStatisticsDto> for ServiceGrpcModel {
+    fn from(value: HourStatisticsDto) -> Self {
+        Self {
+            id: value.app,
+            avg: value.duration_micros / value.amount,
+            amount: value.amount,
         }
     }
 }
