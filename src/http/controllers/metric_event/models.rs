@@ -1,4 +1,5 @@
 use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
+use my_http_server::HttpFailResult;
 use serde::{Deserialize, Serialize};
 
 use crate::db::*;
@@ -7,13 +8,15 @@ use crate::ignore_events::IgnoreEvents;
 #[derive(MyHttpInput)]
 pub struct NewMetricsEvent {
     #[http_body(description = "Metrics")]
-    pub body: Vec<NewMetric>,
+    pub body: my_http_server::types::RawDataTyped<Vec<NewMetric>>,
 }
 
 impl NewMetricsEvent {
-    pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Vec<MetricDto> {
-        let mut result = Vec::with_capacity(self.body.len());
-        for mut metric in self.body {
+    pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Result<Vec<MetricDto>, HttpFailResult> {
+        let metrics = self.body.deserialize_json()?;
+
+        let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
+        for mut metric in metrics {
             if ignore_events.event_should_be_ignored(&metric.service_name, &metric.event_data) {
                 continue;
             }
@@ -49,7 +52,7 @@ impl NewMetricsEvent {
             })
         }
 
-        result
+        Ok(result)
     }
 }
 

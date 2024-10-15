@@ -31,7 +31,7 @@ async fn handle_request(
 ) -> Result<HttpOkResult, HttpFailResult> {
     let ignore_events = action.app.settings_reader.get_ignore_events().await;
 
-    let dto = input_data.into_dto(&ignore_events);
+    let dto = input_data.into_dto(&ignore_events)?;
 
     crate::flows::upload_events(&action.app, dto).await;
 
