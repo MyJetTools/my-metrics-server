@@ -56,6 +56,11 @@ pub struct GetByServiceDataRequest {
     pub data: String,
     #[http_query(name:"hourKey", description = "Hour Key")]
     pub hour_key: i64,
+    #[http_query(name:"clientId", description = "Client Id")]
+    pub client_id: Option<String>,
+
+    #[http_query(name:"fromSecondWithinHour", description = "Second within hour")]
+    pub from_second_within_hour: i64,
 }
 #[derive(Deserialize, Serialize, MyHttpObjectStructure)]
 pub struct MetricsResponse {

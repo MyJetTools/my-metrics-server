@@ -3,6 +3,7 @@ use crate::reader_grpc::*;
 
 use super::server::GrpcService;
 use my_grpc_extensions::server::generate_server_stream;
+use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 
 #[tonic::async_trait]
 impl TelemetryReader for GrpcService {
@@ -56,10 +57,32 @@ impl TelemetryReader for GrpcService {
         request: tonic::Request<GetAppEventsByActionRequest>,
     ) -> Result<tonic::Response<Self::GetAppEventsByActionStream>, tonic::Status> {
         let request = request.into_inner();
+
+        let hour_key: IntervalKey<HourKey> = request.hour_key.into();
+        let from_started = if request.from_sec_within_hour == 0 {
+            None
+        } else {
+            let mut dt: DateTimeAsMicroseconds = hour_key.try_to_date_time().unwrap();
+            dt.add_seconds(request.from_sec_within_hour);
+            Some(dt.unix_microseconds)
+        };
+
+        let client_id = if request.client_id.is_empty() {
+            None
+        } else {
+            Some(request.client_id.as_str())
+        };
+
         let dto_data = self
             .app
             .repo
-            .get_by_service_name(request.hour_key.into(), &request.app_id, &request.data)
+            .get_by_service_name(
+                hour_key,
+                &request.app_id,
+                &request.data,
+                client_id,
+                from_started,
+            )
             .await;
 
         my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| dto.into())

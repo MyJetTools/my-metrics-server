@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
+use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 
 use crate::app_ctx::AppContext;
 
@@ -31,10 +32,25 @@ async fn handle_request(
     input_data: GetByServiceDataRequest,
     _ctx: &HttpContext,
 ) -> Result<HttpOkResult, HttpFailResult> {
+    let hour_key: IntervalKey<HourKey> = input_data.hour_key.into();
+
+    let from_started = if input_data.from_second_within_hour == 0 {
+        None
+    } else {
+        let mut dt: DateTimeAsMicroseconds = hour_key.try_to_date_time().unwrap();
+        dt.add_seconds(input_data.from_second_within_hour);
+        Some(dt.unix_microseconds)
+    };
     let events = action
         .app
         .repo
-        .get_by_service_name(input_data.hour_key.into(), &input_data.id, &input_data.data)
+        .get_by_service_name(
+            input_data.hour_key.into(),
+            &input_data.id,
+            &input_data.data,
+            input_data.client_id.as_deref(),
+            from_started,
+        )
         .await;
 
     let mut metrics = Vec::new();

@@ -88,6 +88,12 @@ pub struct EventTagDto {
 pub struct WhereByServiceName<'s> {
     pub name: &'s str,
     pub data: &'s str,
+    #[ignore_if_none]
+    pub client_id: Option<&'s str>,
+    #[operator(">=")]
+    #[ignore_if_none]
+    pub started: Option<i64>,
+
     #[limit]
     pub limit: usize,
 }

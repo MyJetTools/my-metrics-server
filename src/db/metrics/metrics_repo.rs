@@ -89,15 +89,19 @@ impl MetricsRepo {
         hour_key: IntervalKey<HourKey>,
         service_name: &str,
         data: &str,
+        client_id: Option<&str>,
+        started: Option<i64>,
     ) -> Vec<MetricDto> {
         println!(
-            "Requested get_by_service_name for: {} with data: {}",
-            service_name, data
+            "Requested get_by_service_name for: {} with data: {}. ClientId: {:?}",
+            service_name, data, client_id,
         );
         let where_model = WhereByServiceName {
             name: service_name,
             data,
             limit: 100,
+            client_id,
+            started,
         };
 
         let mut sw = StopWatch::new();
