@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::{MyTimerTick, StopWatch};
+use rust_extensions::{date_time::DateTimeAsMicroseconds, MyTimerTick, StopWatch};
 
 use crate::{
     app_ctx::{AppContext, StatisticsCache},
@@ -20,6 +20,7 @@ impl MetricsWriter {
 #[async_trait::async_trait]
 impl MyTimerTick for MetricsWriter {
     async fn tick(&self) {
+        let started = DateTimeAsMicroseconds::now();
         while let Some(chunks) = self.app.to_write_queue.get_events_to_write(1000).await {
             let mut events_to_write = Vec::new();
 
@@ -56,6 +57,10 @@ impl MyTimerTick for MetricsWriter {
                         .event_amount_by_hours
                         .inc(*interval_key, metric_dto);
                 }
+            }
+
+            if (DateTimeAsMicroseconds::now() - started).get_full_seconds() >= 20 {
+                break;
             }
         }
     }
