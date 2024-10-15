@@ -62,30 +62,8 @@ impl TelemetryReader for GrpcService {
             .get_by_service_name(request.hour_key.into(), &request.app_id, &request.data)
             .await;
 
-        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| {
-            AppDataGrpcModel {
-                process_id: dto.id,
-                started: dto.started,
-                duration: dto.duration_micro,
-                success: dto.success,
-                fail: dto.fail,
-                tags: if let Some(dto_tags) = dto.tags {
-                    let mut result = Vec::with_capacity(dto_tags.len());
-
-                    for dto_tag in dto_tags {
-                        result.push(TagGrpcModel {
-                            key: dto_tag.key,
-                            value: dto_tag.value,
-                        });
-                    }
-
-                    result
-                } else {
-                    vec![]
-                },
-            }
-        })
-        .await
+        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |dto| dto.into())
+            .await
     }
 
     generate_server_stream!(stream_name:"GetByProcessIdStream", item_name:"MetricEventGrpcModel");
