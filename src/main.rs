@@ -11,6 +11,7 @@ mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
+mod lazy_lock;
 mod mappers;
 mod metric_file;
 mod process_id_user_id_links;
