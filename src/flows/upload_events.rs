@@ -1,7 +1,9 @@
 use crate::{app_ctx::AppContext, db::*};
 
 pub async fn upload_events(app: &AppContext, events: Vec<MetricDto>) {
-    app.to_write_queue.enqueue(events).await;
+    let lazy_lock = crate::lazy_lock::LazyLock::new(&app.cache);
+
+    app.to_write_queue.enqueue(events, lazy_lock).await;
 
     /*
     if maps.len() > 0 {

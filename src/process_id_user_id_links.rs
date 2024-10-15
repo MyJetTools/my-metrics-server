@@ -1,5 +1,6 @@
 use rust_extensions::sorted_vec::*;
 
+#[derive(Debug)]
 pub struct ProcessIdUserIdLink {
     pub process_id: i64,
     pub user_id: String,
@@ -40,7 +41,11 @@ impl ProcessIdUserIdLinks {
 
     fn gc(&mut self) {
         while self.items.len() > MAX_ITEMS_AMOUNT {
-            self.items.pop();
+            let item = self.items.pop();
+
+            if let Some(item) = item {
+                println!("Removing link item: {:?}", item);
+            }
         }
     }
 

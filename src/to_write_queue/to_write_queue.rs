@@ -4,7 +4,7 @@ use rust_extensions::{
 };
 use tokio::sync::Mutex;
 
-use crate::db::MetricDto;
+use crate::{app_ctx::StatisticsCache, db::MetricDto};
 
 use super::MetricsChunkByProcessId;
 
@@ -19,9 +19,21 @@ impl ToWriteQueue {
         }
     }
 
-    pub async fn enqueue(&self, to_push: Vec<MetricDto>) {
+    pub async fn enqueue(
+        &self,
+        to_push: Vec<MetricDto>,
+        mut lazy_lock: crate::lazy_lock::LazyLock<'_, StatisticsCache>,
+    ) {
         let mut write_access = self.metrics.lock().await;
         for new_metric in to_push {
+            if let Some(client_id) = new_metric.client_id.as_ref() {
+                lazy_lock
+                    .get_mut()
+                    .await
+                    .process_id_user_id_links
+                    .update(new_metric.id, client_id);
+            }
+
             match write_access.insert_or_update(&new_metric.id) {
                 InsertOrUpdateEntry::Insert(insert_entity) => {
                     insert_entity.insert(MetricsChunkByProcessId::new(new_metric));

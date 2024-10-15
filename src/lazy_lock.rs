@@ -8,6 +8,7 @@ impl<'s, T> LazyLock<'s, T> {
         Self { mutex, guard: None }
     }
 
+    /*
     pub async fn get(&mut self) -> &T {
         if self.guard.is_none() {
             self.guard = Some(self.mutex.lock().await);
@@ -15,6 +16,7 @@ impl<'s, T> LazyLock<'s, T> {
 
         self.guard.as_ref().unwrap()
     }
+     */
 
     pub async fn get_mut(&mut self) -> &mut T {
         if self.guard.is_none() {
