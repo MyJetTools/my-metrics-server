@@ -5,6 +5,7 @@ use crate::{
 
 impl Into<MetricDto> for TelemetryGrpcEvent {
     fn into(self) -> MetricDto {
+        let metric_tags = super::metric_tags::get(Some(self.tags));
         MetricDto {
             id: self.process_id,
             started: self.started_at,
@@ -13,20 +14,8 @@ impl Into<MetricDto> for TelemetryGrpcEvent {
             data: self.event_data,
             success: self.success,
             fail: self.fail,
-            tags: if self.tags.len() > 0 {
-                let result: Vec<_> = self
-                    .tags
-                    .into_iter()
-                    .map(|src| EventTagDto {
-                        key: src.key,
-                        value: src.value,
-                    })
-                    .collect();
-
-                result.into()
-            } else {
-                None
-            },
+            tags: metric_tags.tags,
+            client_id: metric_tags.client_id,
         }
     }
 }

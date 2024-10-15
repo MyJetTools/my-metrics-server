@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::{events_loop::EventsLoopTick, StopWatch};
+use rust_extensions::{MyTimerTick, StopWatch};
 
 use crate::app_ctx::AppContext;
 
@@ -14,12 +14,8 @@ impl MetricsWriter {
     }
 }
 #[async_trait::async_trait]
-impl EventsLoopTick<()> for MetricsWriter {
-    async fn started(&self) {}
-
-    async fn finished(&self) {}
-
-    async fn tick(&self, _: ()) {
+impl MyTimerTick for MetricsWriter {
+    async fn tick(&self) {
         while let Some(events_to_write) = self.app.to_write_queue.get_events_to_write(1000).await {
             //let events_amount = events_to_write.len();
             let mut sw = StopWatch::new();

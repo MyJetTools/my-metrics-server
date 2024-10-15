@@ -1,42 +1,37 @@
 use crate::{app_ctx::AppContext, db::*};
 
-const USER_ID_TAG: &str = "user_id";
-const CLIENT_ID_TAG: &str = "client_id";
-
 pub async fn upload_events(app: &AppContext, mut events: Vec<MetricDto>) {
-    populate_user_id(app, &mut events).await;
-    app.to_write_queue.enqueue(events).await;
+    populate_client_id(app, &mut events).await;
+
+    let maps = app.to_write_queue.enqueue(events).await;
+
+    if maps.len() > 0 {
+        let mut cache_access = app.cache.lock().await;
+
+        for (process_id, client_id) in maps {
+            cache_access
+                .process_id_user_id_links
+                .update(process_id, client_id.as_str());
+        }
+    }
 }
 
-async fn populate_user_id(app: &AppContext, events: &mut Vec<MetricDto>) {
-    let mut cache_write_access = app.cache.lock().await;
+async fn populate_client_id(app: &AppContext, events: &mut Vec<MetricDto>) {
+    let has_with_no_client_id = events.iter().any(|event| event.client_id.is_none());
 
-    for event in events {
-        let mut has_user_id = false;
+    if !has_with_no_client_id {
+        return;
+    }
 
-        if let Some(user_id) = event.get_tag_value(USER_ID_TAG) {
-            cache_write_access
-                .process_id_user_id_links
-                .update(event.id, user_id);
+    let cache_access = app.cache.lock().await;
 
-            has_user_id = true;
-        }
-
-        if has_user_id {
-            event.update_user_id_to_client_id(USER_ID_TAG, CLIENT_ID_TAG);
-            continue;
-        }
-
-        if let Some(client_id) = event.get_tag_value(CLIENT_ID_TAG) {
-            cache_write_access
-                .process_id_user_id_links
-                .update(event.id, client_id);
-        } else {
-            if let Some(user_id) = cache_write_access
+    for event in events.iter_mut() {
+        if event.client_id.is_none() {
+            if let Some(client_id) = cache_access
                 .process_id_user_id_links
                 .resolve_user_id(event.id)
             {
-                event.add_tag(CLIENT_ID_TAG.to_string(), user_id.to_string());
+                event.client_id = Some(client_id.to_string());
             }
         }
     }

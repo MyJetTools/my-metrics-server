@@ -23,6 +23,7 @@ pub struct MetricDto {
     pub success: Option<String>,
     pub fail: Option<String>,
     pub tags: Option<Vec<EventTagDto>>,
+    pub client_id: Option<String>,
 }
 
 impl MetricDto {
@@ -42,6 +43,16 @@ impl MetricDto {
         None
     }
 
+    pub fn remove_tag_value(&mut self, key: &str) -> Option<EventTagDto> {
+        let tags = self.tags.as_mut()?;
+
+        let index = tags.iter().position(|x| x.key == key)?;
+
+        let result = tags.remove(index);
+
+        Some(result)
+    }
+
     pub fn update_user_id_to_client_id(&mut self, user_id_tag: &str, client_id_tag: &str) {
         if let Some(tags) = &mut self.tags {
             let index = tags.iter().position(|x| x.key == user_id_tag);
@@ -56,12 +67,14 @@ impl MetricDto {
         }
     }
 
-    pub fn add_tag(&mut self, key: String, value: String) {
+    pub fn add_tag(&mut self, key: String, value: String) -> &str {
         if let Some(tags) = self.tags.as_mut() {
             tags.push(EventTagDto { key, value });
         } else {
             self.tags = Some(vec![EventTagDto { key, value }]);
         }
+
+        self.tags.as_ref().unwrap().last().unwrap().value.as_str()
     }
 }
 

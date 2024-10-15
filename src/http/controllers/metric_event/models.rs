@@ -1,5 +1,4 @@
 use my_http_server::macros::{MyHttpInput, MyHttpObjectStructure};
-use my_http_server::HttpFailResult;
 use serde::{Deserialize, Serialize};
 
 use crate::db::*;
@@ -7,17 +6,14 @@ use crate::ignore_events::IgnoreEvents;
 
 #[derive(MyHttpInput)]
 pub struct NewMetricsEvent {
-    #[http_body_raw(description = "Metrics")]
-    pub body: my_http_server::types::RawDataTyped<Vec<NewMetric>>,
+    #[http_body(description = "Metrics")]
+    pub body: Vec<NewMetric>,
 }
 
 impl NewMetricsEvent {
-    pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Result<Vec<MetricDto>, HttpFailResult> {
-        let metrics = self.body.deserialize_json()?;
-
-        let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
-
-        for mut metric in metrics {
+    pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Vec<MetricDto> {
+        let mut result = Vec::with_capacity(self.body.len());
+        for mut metric in self.body {
             if ignore_events.event_should_be_ignored(&metric.service_name, &metric.event_data) {
                 continue;
             }
@@ -27,31 +23,18 @@ impl NewMetricsEvent {
                 duration = 0;
             }
 
-            let mut tags = None;
-
-            if let Some(http_tags) = metric.tags.take() {
-                for http_tag in http_tags {
-                    if tags.is_none() {
-                        tags = Some(Vec::new());
-                    }
-
-                    tags.as_mut().unwrap().push(EventTagDto {
-                        key: http_tag.key,
-                        value: http_tag.value,
-                    });
-                }
-            }
-
-            if let Some(ip) = metric.ip {
-                if tags.is_none() {
-                    tags = Some(Vec::new());
+            if let Some(ip) = metric.ip.take() {
+                if metric.tags.is_none() {
+                    metric.tags = Some(Vec::new());
                 }
 
-                tags.as_mut().unwrap().push(EventTagDto {
+                metric.tags.as_mut().unwrap().push(MetricHttpTag {
                     key: "ip".to_string(),
                     value: ip,
                 });
             }
+
+            let metric_tags = crate::mappers::metric_tags::get(metric.tags.take());
 
             result.push(MetricDto {
                 id: metric.process_id,
@@ -61,11 +44,12 @@ impl NewMetricsEvent {
                 data: metric.event_data,
                 success: metric.success,
                 fail: metric.fail,
-                tags,
+                tags: metric_tags.tags,
+                client_id: metric_tags.client_id,
             })
         }
 
-        Ok(result)
+        result
     }
 }
 
@@ -85,10 +69,10 @@ pub struct NewMetric {
     pub success: Option<String>,
     pub fail: Option<String>,
     pub ip: Option<String>,
-    pub tags: Option<Vec<MetricHttpTags>>,
+    pub tags: Option<Vec<MetricHttpTag>>,
 }
 #[derive(Serialize, Deserialize, MyHttpObjectStructure)]
-pub struct MetricHttpTags {
+pub struct MetricHttpTag {
     pub key: String,
     pub value: String,
 }

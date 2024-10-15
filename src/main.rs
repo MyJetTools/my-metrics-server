@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use rust_extensions::{events_loop::EventsLoop, MyTimer};
+use rust_extensions::MyTimer;
 use timers::{GcTimer, MetricsWriter, SaveStatisticsTimer};
 
 mod app_ctx;
@@ -11,11 +11,13 @@ mod flows;
 mod grpc_server;
 mod http;
 mod ignore_events;
+mod mappers;
 mod metric_file;
 mod process_id_user_id_links;
 mod scripts;
 mod settings;
 mod timers;
+mod to_write_queue;
 
 pub mod writer_grpc {
     tonic::include_proto!("writer");
@@ -34,9 +36,7 @@ async fn main() {
 
     let settings_reader = Arc::new(settings_reader);
 
-    let mut events_loop = EventsLoop::new("MetricsWriter".to_string(), my_logger::LOGGER.clone());
-
-    let app = app_ctx::AppContext::new(settings_reader, events_loop.get_publisher()).await;
+    let app = app_ctx::AppContext::new(settings_reader).await;
 
     let app = Arc::new(app);
 
@@ -69,10 +69,11 @@ async fn main() {
 
     save_statistics_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
-    let metrics_writer = MetricsWriter::new(app.clone());
-    events_loop.register_event_loop(Arc::new(metrics_writer));
+    let mut metrics_writer_timer = MyTimer::new(Duration::from_millis(621));
+    let metrics_writer: MetricsWriter = MetricsWriter::new(app.clone());
+    metrics_writer_timer.register_timer("MetricsWriter", Arc::new(metrics_writer));
 
-    events_loop.start(app.app_states.clone());
+    metrics_writer_timer.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
     http_server.start(app.app_states.clone(), my_logger::LOGGER.clone());
 
