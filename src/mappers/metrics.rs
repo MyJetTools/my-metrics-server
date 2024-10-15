@@ -3,8 +3,6 @@ use crate::{
     writer_grpc::*,
 };
 
-use super::metric_tags::CLIENT_ID_TAG;
-
 impl Into<MetricDto> for TelemetryGrpcEvent {
     fn into(self) -> MetricDto {
         let metric_tags = super::metric_tags::get(Some(self.tags));
@@ -73,34 +71,29 @@ impl From<HourStatisticsDto> for ServiceGrpcModel {
 }
 
 impl Into<AppDataGrpcModel> for MetricDto {
-    fn into(self) -> AppDataGrpcModel {
-        let mut tags = if let Some(dto_tags) = self.tags {
-            let mut result = Vec::with_capacity(dto_tags.len());
-
-            for dto_tag in dto_tags {
-                result.push(TagGrpcModel {
-                    key: dto_tag.key,
-                    value: dto_tag.value,
-                });
-            }
-
-            result
-        } else {
-            vec![]
-        };
-
-        if let Some(client_id) = self.client_id {
-            tags.push(TagGrpcModel {
-                key: CLIENT_ID_TAG.to_string(),
-                value: client_id,
-            });
-        }
+    fn into(mut self) -> AppDataGrpcModel {
+        let tags = super::metric_tags::to_tag_grpc_model(&mut self);
 
         AppDataGrpcModel {
             process_id: self.id,
             started: self.started,
             duration: self.duration_micro,
             success: self.success,
+            fail: self.fail,
+            tags,
+        }
+    }
+}
+
+impl Into<MetricEventGrpcModel> for MetricDto {
+    fn into(mut self) -> MetricEventGrpcModel {
+        let tags = super::metric_tags::to_tag_grpc_model(&mut self);
+        MetricEventGrpcModel {
+            started: self.started,
+            duration: self.duration_micro,
+            success: self.success,
+            name: self.name,
+            data: self.data,
             fail: self.fail,
             tags,
         }
