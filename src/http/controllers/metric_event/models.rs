@@ -13,7 +13,20 @@ pub struct NewMetricsEvent {
 
 impl NewMetricsEvent {
     pub fn into_dto(self, ignore_events: &IgnoreEvents) -> Result<Vec<MetricDto>, HttpFailResult> {
-        let metrics = self.body.deserialize_json()?;
+        let metrics = self.body.deserialize_json();
+
+        if metrics.is_err() {
+            let to_print = self.body.as_slice();
+            let to_print = if to_print.len() >= 64 {
+                std::str::from_utf8(&to_print[0..64]).unwrap()
+            } else {
+                std::str::from_utf8(to_print).unwrap()
+            };
+
+            println!("Invalid json: {}", to_print);
+        }
+
+        let metrics = metrics?;
 
         let mut result: Vec<MetricDto> = Vec::with_capacity(metrics.len());
         for mut metric in metrics {
