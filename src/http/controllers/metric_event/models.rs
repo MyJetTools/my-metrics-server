@@ -52,6 +52,8 @@ impl NewMetricsEvent {
 
             let metric_tags = crate::mappers::metric_tags::get(metric.tags.take());
 
+            println!("Getting metrics by HTTP: {:?}", metric.service_name);
+
             result.push(MetricDto {
                 id: metric.process_id,
                 started: metric.started,
