@@ -20,30 +20,14 @@ impl MetricsChunkByProcessId {
         }
     }
 
-    pub fn push(&mut self, mut new_metric: MetricDto) {
-        if let Some(client_id) = self.client_id.as_ref() {
-            if new_metric.client_id.is_none() {
-                new_metric.client_id = Some(client_id.clone());
+    pub fn push(&mut self, new_metric: MetricDto) {
+        if self.client_id.is_none() {
+            if let Some(client_id) = new_metric.client_id.clone() {
+                self.client_id = Some(client_id);
             }
-
-            self.items.push(new_metric);
-            return;
-        }
-
-        if let Some(client_id) = new_metric.client_id.as_ref() {
-            self.client_id = Some(client_id.clone());
-            self.update_client_id_to_all();
         }
 
         self.items.push(new_metric);
-    }
-
-    fn update_client_id_to_all(&mut self) {
-        for itm in self.items.iter_mut() {
-            if itm.client_id.is_none() {
-                itm.client_id = self.client_id.clone();
-            }
-        }
     }
 }
 

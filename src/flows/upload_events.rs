@@ -1,10 +1,9 @@
 use crate::{app_ctx::AppContext, db::*};
 
-pub async fn upload_events(app: &AppContext, mut events: Vec<MetricDto>) {
-    populate_client_id(app, &mut events).await;
+pub async fn upload_events(app: &AppContext, events: Vec<MetricDto>) {
+    app.to_write_queue.enqueue(events).await;
 
-    let maps = app.to_write_queue.enqueue(events).await;
-
+    /*
     if maps.len() > 0 {
         let mut cache_access = app.cache.lock().await;
 
@@ -14,8 +13,10 @@ pub async fn upload_events(app: &AppContext, mut events: Vec<MetricDto>) {
                 .update(process_id, client_id.as_str());
         }
     }
+     */
 }
 
+/*
 async fn populate_client_id(app: &AppContext, events: &mut Vec<MetricDto>) {
     let has_with_no_client_id = events.iter().any(|event| event.client_id.is_none());
 
@@ -36,3 +37,4 @@ async fn populate_client_id(app: &AppContext, events: &mut Vec<MetricDto>) {
         }
     }
 }
+ */
