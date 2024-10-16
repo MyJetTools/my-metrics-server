@@ -33,7 +33,7 @@ impl MyTimerTick for GcTimer {
         let mut cache_access = self.app.cache.lock().await;
 
         cache_access
-            .statistics_by_hour_and_service_name
+            .statistics_by_app_and_data
             .gc_old_data(hour_key);
 
         cache_access.event_amount_by_hours.gc_old_data(hour_key);

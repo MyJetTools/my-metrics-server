@@ -13,7 +13,7 @@ pub async fn get_hour_app_data_statistics<
         .cache
         .lock()
         .await
-        .statistics_by_hour_and_service_name
+        .statistics_by_app_and_data
         .get(hour_key, app, |itm| itm.clone().into());
 
     if let Some(result) = result {

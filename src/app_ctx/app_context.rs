@@ -1,5 +1,5 @@
 use crate::{
-    caches::StatisticsByHourAndServiceName,
+    caches::StatisticsByAppAndData,
     db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
     events_amount_by_hour::EventAmountsByHour,
     process_id_user_id_links::ProcessIdUserIdLinks,
@@ -17,14 +17,14 @@ pub const METRICS_FILE_PREFIX: &'static str = "metrics";
 
 pub struct StatisticsCache {
     pub event_amount_by_hours: EventAmountsByHour,
-    pub statistics_by_hour_and_service_name: StatisticsByHourAndServiceName,
+    pub statistics_by_app_and_data: StatisticsByAppAndData,
     pub process_id_user_id_links: ProcessIdUserIdLinks,
 }
 
 impl StatisticsCache {
     pub fn new() -> Self {
         Self {
-            statistics_by_hour_and_service_name: StatisticsByHourAndServiceName::new(),
+            statistics_by_app_and_data: StatisticsByAppAndData::new(),
             event_amount_by_hours: EventAmountsByHour::new(),
             process_id_user_id_links: ProcessIdUserIdLinks::new(),
         }

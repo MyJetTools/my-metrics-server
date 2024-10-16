@@ -49,7 +49,7 @@ impl MyTimerTick for MetricsWriter {
 
             for (interval_key, grouped) in &items {
                 cache_write_access
-                    .statistics_by_hour_and_service_name
+                    .statistics_by_app_and_data
                     .update(*interval_key, grouped);
 
                 for metric_dto in grouped {

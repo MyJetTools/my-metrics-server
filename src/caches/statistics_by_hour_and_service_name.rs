@@ -9,12 +9,12 @@ use crate::db::*;
 
 use super::AppDataHourStatistics;
 
-pub struct StatisticsByHourAndServiceName {
+pub struct StatisticsByAppAndData {
     data: BTreeMap<i64, SortedVecWith2StrKey<AppDataHourStatistics>>,
     to_persist: BTreeMap<i64, SortedVecWith2StrKey<AppDataHourStatistics>>,
 }
 
-impl StatisticsByHourAndServiceName {
+impl StatisticsByAppAndData {
     pub fn new() -> Self {
         Self {
             data: BTreeMap::new(),

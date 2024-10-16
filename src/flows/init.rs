@@ -12,7 +12,7 @@ pub async fn init(app: &AppContext) {
 
     let mut cache_write_access = app.cache.lock().await;
     cache_write_access
-        .statistics_by_hour_and_service_name
+        .statistics_by_app_and_data
         .restore(hour_key, hour_app_data_items);
 
     cache_write_access

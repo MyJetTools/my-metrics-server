@@ -75,11 +75,14 @@ message AvailableFileGrpcModel{
 }
 
 message TechMetricsGrpcModel{
-    uint64 QueueHoursSize = 1;
-    uint64 QueueToPersistHoursSize = 2;
+    uint64 AppDataHoursSize = 1;
+    uint64 AppDataToPersistHoursSize = 2;
     uint64 QueueSize = 3;
     uint64 QueueCapacity = 4;
-    uint64 UserIdLinksSize = 5;
+    uint64 QueueByProcessCapacity = 5;
+    uint64 UserIdLinksSize = 6;
+    uint64 AppDataSize = 7;
+    uint64 AppDataCapacity = 8;
 }
 
 service TelemetryReader {

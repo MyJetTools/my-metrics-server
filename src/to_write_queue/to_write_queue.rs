@@ -76,4 +76,16 @@ impl ToWriteQueue {
 
         Some(result)
     }
+
+    pub async fn get_queue_and_capacity_and_by_process_capacity(&self) -> (usize, usize, usize) {
+        let read_access = self.metrics.lock().await;
+
+        let mut len = 0;
+        let mut capacity = 0;
+        for itm in read_access.iter() {
+            len += itm.items.len();
+            capacity += itm.items.capacity();
+        }
+        (len, capacity, read_access.capacity())
+    }
 }
