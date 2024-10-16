@@ -30,6 +30,7 @@ impl SqlLitePoolItem {
     }
 
     pub async fn recreate(file_name: String) -> Self {
+        println!("DB is recreated for file: {}", file_name);
         let connection = SqlLiteConnectionBuilder::new(file_name.to_string())
             .build()
             .await
