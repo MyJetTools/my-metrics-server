@@ -22,7 +22,7 @@ impl MyTimerTick for MetricsWriter {
     async fn tick(&self) {
         let started = DateTimeAsMicroseconds::now();
         while let Some(chunks) = self.app.to_write_queue.get_events_to_write(1000).await {
-            let mut events_to_write = Vec::new();
+            let mut events_to_write = Vec::with_capacity(1000);
 
             {
                 let mut cache_access = self.app.cache.lock().await;
@@ -82,5 +82,8 @@ async fn populate_client_id<'s>(
 
             out_put.push(metric);
         }
+        return;
     }
+
+    out_put.extend(chunk.items);
 }
