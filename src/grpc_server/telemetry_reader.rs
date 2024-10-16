@@ -132,9 +132,10 @@ impl TelemetryReader for GrpcService {
             TechMetricsGrpcModel {
                 app_data_hours_size: app_data_hour_size.0 as u64,
                 app_data_to_persist_hours_size: app_data_hour_size.1 as u64,
-                queue_size: queue_and_capacity.0 as u64,
-                queue_capacity: queue_and_capacity.1 as u64,
-                queue_by_process_capacity: queue_and_capacity.2 as u64,
+                queue_size: queue_and_capacity.events_queue_size as u64,
+                queue_capacity: queue_and_capacity.events_capacity_size as u64,
+                queue_by_process_size: queue_and_capacity.process_queue_size as u64,
+                queue_by_process_capacity: queue_and_capacity.process_queue_capacity as u64,
                 user_id_links_size: user_id_links_size as u64,
                 app_data_size: app_data_size.0 as u64,
                 app_data_capacity: app_data_size.1 as u64,

@@ -79,10 +79,11 @@ message TechMetricsGrpcModel{
     uint64 AppDataToPersistHoursSize = 2;
     uint64 QueueSize = 3;
     uint64 QueueCapacity = 4;
-    uint64 QueueByProcessCapacity = 5;
-    uint64 UserIdLinksSize = 6;
-    uint64 AppDataSize = 7;
-    uint64 AppDataCapacity = 8;
+    uint64 QueueByProcessSize = 5;
+    uint64 QueueByProcessCapacity = 6;
+    uint64 UserIdLinksSize = 7;
+    uint64 AppDataSize = 8;
+    uint64 AppDataCapacity = 9;
 }
 
 service TelemetryReader {
