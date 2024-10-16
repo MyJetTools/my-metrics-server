@@ -31,6 +31,9 @@ pub mod reader_grpc {
 const DEFAULT_HTTP_PORT: u16 = 8000;
 const DEFAULT_GRPC_PORT: u16 = 8888;
 
+#[global_allocator]
+static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
 #[tokio::main]
 async fn main() {
     let settings_reader = crate::settings::SettingsReader::new(".my-telemetry").await;

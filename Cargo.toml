@@ -49,8 +49,13 @@ prost = "*"
 prost-types = "*"
 futures-core = "*"
 
-
 ring = "*"
+
+tikv-jemalloc-ctl = { version = "*", features = ['use_std'] }
+tikv-jemallocator = { version = "*", features = [
+    "unprefixed_malloc_on_supported_platforms",
+] }
+
 
 [build-dependencies]
 tonic-build = { version = "*", features = ["prost"] }
