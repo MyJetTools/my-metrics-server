@@ -56,7 +56,7 @@ impl ToWriteQueue {
         let mut amount = 0;
 
         for itm in write_access.iter_mut() {
-            if (now - itm.created).get_full_seconds() >= 3 {
+            if (now - itm.created).get_full_seconds() >= 10 {
                 ready_to_go.push(itm.process_id);
                 amount += itm.items.len();
 
