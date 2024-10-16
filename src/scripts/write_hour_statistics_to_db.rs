@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 
 use rust_extensions::sorted_vec::SortedVecWithStrKey;
 
-use crate::{app_ctx::AppContext, db::HourStatisticsDto, events_amount_by_hour::StatisticsByHour};
+use crate::{app_ctx::AppContext, caches::AppDurationStatistics, db::HourStatisticsDto};
 
 pub async fn write_hour_statistics_to_db(
     app: &AppContext,
-    metrics_to_save: BTreeMap<i64, SortedVecWithStrKey<StatisticsByHour>>,
+    metrics_to_save: BTreeMap<i64, SortedVecWithStrKey<AppDurationStatistics>>,
 ) {
     let mut dto = Vec::new();
 

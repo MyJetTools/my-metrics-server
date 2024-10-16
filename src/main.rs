@@ -6,7 +6,6 @@ use timers::{GcTimer, MetricsWriter, SaveStatisticsTimer};
 mod app_ctx;
 mod caches;
 mod db;
-mod events_amount_by_hour;
 mod flows;
 mod grpc_server;
 mod http;

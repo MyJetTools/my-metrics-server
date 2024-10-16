@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use rust_extensions::{
     date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey},
@@ -22,20 +22,24 @@ impl MyTimerTick for GcTimer {
     async fn tick(&self) {
         let duration = self.app.settings_reader.get_hours_to_gc().await;
 
-        let gc_from = DateTimeAsMicroseconds::now().sub(duration);
-
-        let hour_key: IntervalKey<HourKey> = gc_from.into();
+        let hour_key: IntervalKey<HourKey> = DateTimeAsMicroseconds::now().sub(duration).into();
 
         //println!("GC hour is: {}", hour_key.to_i64());
 
         crate::scripts::gc_files(&self.app, hour_key).await;
 
+        let cache_gc_hour_key: IntervalKey<HourKey> = DateTimeAsMicroseconds::now()
+            .sub(Duration::from_secs(60 * 60 * 2))
+            .into();
+
         let mut cache_access = self.app.cache.lock().await;
 
         cache_access
             .statistics_by_app_and_data
-            .gc_old_data(hour_key);
+            .gc_old_data(cache_gc_hour_key);
 
-        cache_access.event_amount_by_hours.gc_old_data(hour_key);
+        cache_access
+            .event_amount_by_hours
+            .gc_old_data(cache_gc_hour_key);
     }
 }

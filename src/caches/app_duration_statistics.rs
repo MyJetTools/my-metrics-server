@@ -8,19 +8,19 @@ use rust_extensions::{
 use crate::db::*;
 
 #[derive(Debug, Clone)]
-pub struct StatisticsByHour {
+pub struct AppDurationStatistics {
     pub name: String,
     pub amount: i64,
     pub duration_micros: i64,
 }
 
-impl EntityWithStrKey for StatisticsByHour {
+impl EntityWithStrKey for AppDurationStatistics {
     fn get_key(&self) -> &str {
         self.name.as_str()
     }
 }
 
-impl StatisticsByHour {
+impl AppDurationStatistics {
     pub fn new(name: String, duration_micros: i64) -> Self {
         Self {
             name,
@@ -32,7 +32,7 @@ impl StatisticsByHour {
     pub fn update(&mut self, other: Self) {
         *self = other;
     }
-    pub fn inc(&mut self, duration_micros: i64) -> StatisticsByHour {
+    pub fn inc(&mut self, duration_micros: i64) -> AppDurationStatistics {
         self.amount += 1;
         self.duration_micros += duration_micros;
 
@@ -40,9 +40,9 @@ impl StatisticsByHour {
     }
 }
 
-impl Into<StatisticsByHour> for HourStatisticsDto {
-    fn into(self) -> StatisticsByHour {
-        StatisticsByHour {
+impl Into<AppDurationStatistics> for HourStatisticsDto {
+    fn into(self) -> AppDurationStatistics {
+        AppDurationStatistics {
             name: self.app,
             amount: self.amount,
             duration_micros: self.duration_micros,
@@ -51,8 +51,8 @@ impl Into<StatisticsByHour> for HourStatisticsDto {
 }
 
 pub struct EventAmountsByHour {
-    pub items: BTreeMap<i64, SortedVecWithStrKey<StatisticsByHour>>,
-    pub to_persist: BTreeMap<i64, SortedVecWithStrKey<StatisticsByHour>>,
+    pub items: BTreeMap<i64, SortedVecWithStrKey<AppDurationStatistics>>,
+    pub to_persist: BTreeMap<i64, SortedVecWithStrKey<AppDurationStatistics>>,
 }
 
 impl EventAmountsByHour {
@@ -78,7 +78,7 @@ impl EventAmountsByHour {
             */
             match items.insert_or_update(metric_dto.name.as_str()) {
                 InsertOrUpdateEntry::Insert(entry) => {
-                    let item = StatisticsByHour::new(
+                    let item = AppDurationStatistics::new(
                         metric_dto.name.to_string(),
                         metric_dto.duration_micro,
                     );
@@ -93,7 +93,7 @@ impl EventAmountsByHour {
         } else {
             let mut sorted_vec = SortedVecWithStrKey::new();
             let item =
-                StatisticsByHour::new(metric_dto.name.to_string(), metric_dto.duration_micro);
+                AppDurationStatistics::new(metric_dto.name.to_string(), metric_dto.duration_micro);
             sorted_vec.insert_or_replace(item.clone());
             self.items.insert(as_i64, sorted_vec);
             item
@@ -102,7 +102,7 @@ impl EventAmountsByHour {
         self.engage_persist(as_i64, metric_dto.name.as_str(), to_persist);
     }
 
-    fn engage_persist(&mut self, interval_key: i64, app: &str, to_persist: StatisticsByHour) {
+    fn engage_persist(&mut self, interval_key: i64, app: &str, to_persist: AppDurationStatistics) {
         if let Some(sub_items) = self.to_persist.get_mut(&interval_key) {
             match sub_items.get_mut(app) {
                 Some(count) => {
@@ -123,7 +123,7 @@ impl EventAmountsByHour {
 
     pub fn get_to_persist(
         &mut self,
-    ) -> Option<BTreeMap<i64, SortedVecWithStrKey<StatisticsByHour>>> {
+    ) -> Option<BTreeMap<i64, SortedVecWithStrKey<AppDurationStatistics>>> {
         if self.to_persist.is_empty() {
             return None;
         }
@@ -138,7 +138,7 @@ impl EventAmountsByHour {
     pub fn restore(
         &mut self,
         hour_key: IntervalKey<HourKey>,
-        items_to_restore: impl Iterator<Item = StatisticsByHour>,
+        items_to_restore: impl Iterator<Item = AppDurationStatistics>,
     ) {
         let mut result = SortedVecWithStrKey::new();
 
@@ -151,7 +151,7 @@ impl EventAmountsByHour {
     pub fn get<TResult>(
         &self,
         hour_key: IntervalKey<HourKey>,
-        convert: impl Fn(&StatisticsByHour) -> TResult,
+        convert: impl Fn(&AppDurationStatistics) -> TResult,
     ) -> Option<Vec<TResult>> {
         let items = self.items.get(hour_key.as_i64_ref())?;
 

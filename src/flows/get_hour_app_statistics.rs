@@ -1,8 +1,10 @@
 use rust_extensions::date_time::{HourKey, IntervalKey};
 
-use crate::{app_ctx::AppContext, db::HourStatisticsDto, events_amount_by_hour::StatisticsByHour};
+use crate::{app_ctx::AppContext, caches::*, db::HourStatisticsDto};
 
-pub async fn get_hour_app_statistics<TResult: From<StatisticsByHour> + From<HourStatisticsDto>>(
+pub async fn get_hour_app_statistics<
+    TResult: From<AppDurationStatistics> + From<HourStatisticsDto>,
+>(
     app: &AppContext,
     hour_key: IntervalKey<HourKey>,
 ) -> Vec<TResult> {

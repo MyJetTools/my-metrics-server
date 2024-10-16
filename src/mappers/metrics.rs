@@ -1,5 +1,7 @@
 use crate::{
-    caches::AppDataHourStatistics, db::*, events_amount_by_hour::StatisticsByHour, reader_grpc::*,
+    caches::{AppDataHourStatistics, AppDurationStatistics},
+    db::*,
+    reader_grpc::*,
     writer_grpc::*,
 };
 
@@ -50,8 +52,8 @@ impl From<HourAppDataStatisticsDto> for AppActionGrpcModel {
     }
 }
 
-impl From<StatisticsByHour> for ServiceGrpcModel {
-    fn from(value: StatisticsByHour) -> Self {
+impl From<AppDurationStatistics> for ServiceGrpcModel {
+    fn from(value: AppDurationStatistics) -> Self {
         Self {
             id: value.name,
             avg: value.duration_micros / value.amount,

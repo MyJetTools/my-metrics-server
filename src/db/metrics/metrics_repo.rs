@@ -41,6 +41,8 @@ impl MetricsRepo {
             by_hour_key.get_mut(&hour_key).unwrap().push(dto);
         }
 
+        /*
+        Debugging without Save for Memory Leak
         for (hour_key, items) in &by_hour_key {
             // println!("Inserting {} metrics for hour: {:?}", items.len(), hour_key);
             let connection = self.pool.get_for_write_access(*hour_key).await;
@@ -54,6 +56,7 @@ impl MetricsRepo {
                 println!("Failed to write metrics to db: {:?}", err);
             }
         }
+         */
 
         by_hour_key
     }

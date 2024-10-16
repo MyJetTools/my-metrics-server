@@ -1,7 +1,6 @@
 use crate::{
-    caches::StatisticsByAppAndData,
+    caches::{EventAmountsByHour, StatisticsByAppAndData},
     db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
-    events_amount_by_hour::EventAmountsByHour,
     process_id_user_id_links::ProcessIdUserIdLinks,
     settings::SettingsReader,
     to_write_queue::ToWriteQueue,

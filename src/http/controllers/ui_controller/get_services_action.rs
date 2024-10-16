@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use my_http_server::{HttpContext, HttpFailResult, HttpOkResult, HttpOutput};
 
-use crate::{app_ctx::AppContext, db::HourStatisticsDto, events_amount_by_hour::StatisticsByHour};
+use crate::{app_ctx::AppContext, caches::AppDurationStatistics, db::HourStatisticsDto};
 
 use super::models::*;
 
@@ -39,8 +39,8 @@ async fn handle_request(
     return HttpOutput::as_json(result).into_ok_result(true).into();
 }
 
-impl From<StatisticsByHour> for ServiceHttpModel {
-    fn from(value: StatisticsByHour) -> Self {
+impl From<AppDurationStatistics> for ServiceHttpModel {
+    fn from(value: AppDurationStatistics) -> Self {
         Self {
             id: value.name,
             avg: value.duration_micros / value.amount,
