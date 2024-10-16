@@ -145,6 +145,41 @@ impl TelemetryReader for GrpcService {
         Ok(tonic::Response::new(response))
     }
 
+    async fn add_permanent_user(
+        &self,
+        request: tonic::Request<AddPermanentUserGrpcRequest>,
+    ) -> Result<tonic::Response<()>, tonic::Status> {
+        let request = request.into_inner();
+        crate::flows::add_permanent_user(&self.app, request.user_id).await;
+        Ok(tonic::Response::new(()))
+    }
+
+    async fn delete_permanent_user(
+        &self,
+        request: tonic::Request<DeletePermanentUserGrpcRequest>,
+    ) -> Result<tonic::Response<()>, tonic::Status> {
+        let request = request.into_inner();
+        crate::flows::delete_permanent_user(&self.app, request.user_id).await;
+        Ok(tonic::Response::new(()))
+    }
+
+    generate_server_stream!(stream_name:"GetPermanentUsersStream", item_name:"PermanentUserGrpcModel");
+
+    async fn get_permanent_users(
+        &self,
+        _: tonic::Request<()>,
+    ) -> Result<tonic::Response<Self::GetPermanentUsersStream>, tonic::Status> {
+        let dto_data = crate::flows::get_permanent_users(&self.app).await;
+
+        my_grpc_extensions::grpc_server::send_vec_to_stream(dto_data.into_iter(), |model| {
+            PermanentUserGrpcModel {
+                user_id: model.user,
+                added: model.created,
+            }
+        })
+        .await
+    }
+
     async fn ping(&self, _: tonic::Request<()>) -> Result<tonic::Response<()>, tonic::Status> {
         Ok(tonic::Response::new(()))
     }

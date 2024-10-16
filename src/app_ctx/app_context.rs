@@ -1,6 +1,7 @@
 use crate::{
     caches::{EventAmountsByHour, StatisticsByAppAndData},
     db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
+    permanent_users::PermanentUsersList,
     process_id_user_id_links::ProcessIdUserIdLinks,
     settings::SettingsReader,
     to_write_queue::ToWriteQueue,
@@ -18,6 +19,7 @@ pub struct StatisticsCache {
     pub event_amount_by_hours: EventAmountsByHour,
     pub statistics_by_app_and_data: StatisticsByAppAndData,
     pub process_id_user_id_links: ProcessIdUserIdLinks,
+    pub permanent_users_list: PermanentUsersList,
 }
 
 impl StatisticsCache {
@@ -26,6 +28,7 @@ impl StatisticsCache {
             statistics_by_app_and_data: StatisticsByAppAndData::new(),
             event_amount_by_hours: EventAmountsByHour::new(),
             process_id_user_id_links: ProcessIdUserIdLinks::new(),
+            permanent_users_list: PermanentUsersList::new(),
         }
     }
 }

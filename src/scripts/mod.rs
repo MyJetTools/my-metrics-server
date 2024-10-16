@@ -7,3 +7,4 @@ mod get_metrics_files;
 pub use get_metrics_files::*;
 mod gc_files;
 pub use gc_files::*;
+pub mod permanent_users;

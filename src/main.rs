@@ -13,6 +13,7 @@ mod ignore_events;
 mod lazy_lock;
 mod mappers;
 mod metric_file;
+mod permanent_users;
 mod process_id_user_id_links;
 mod scripts;
 mod settings;

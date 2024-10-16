@@ -3,6 +3,7 @@ use rust_extensions::date_time::{DateTimeAsMicroseconds, HourKey, IntervalKey};
 use crate::app_ctx::AppContext;
 
 pub async fn init(app: &AppContext) {
+    let users = crate::scripts::permanent_users::load(app).await;
     let now = DateTimeAsMicroseconds::now();
     let hour_key: IntervalKey<HourKey> = now.into();
 
@@ -18,4 +19,10 @@ pub async fn init(app: &AppContext) {
     cache_write_access
         .event_amount_by_hours
         .restore(hour_key, hour_app_items.into_iter().map(|itm| itm.into()));
+
+    for user in users {
+        cache_write_access
+            .permanent_users_list
+            .add_permanent_user(user);
+    }
 }
