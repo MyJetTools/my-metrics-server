@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use rust_extensions::{date_time::DateTimeAsMicroseconds, MyTimerTick, StopWatch};
+use rust_extensions::{date_time::DateTimeAsMicroseconds, MyTimerTick};
 
 use crate::{
     app_ctx::{AppContext, StatisticsCache},
@@ -32,10 +32,8 @@ impl MyTimerTick for MetricsWriter {
             }
 
             //let events_amount = events_to_write.len();
-            let mut sw = StopWatch::new();
-            sw.start();
+
             let items = self.app.repo.insert(events_to_write).await;
-            sw.pause();
 
             /*
             println!(
