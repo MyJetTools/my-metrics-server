@@ -10,6 +10,7 @@ pub struct SqlLitePoolItem {
     pub last_access: DateTimeAsMicroseconds,
     pub connection: Arc<Mutex<SqlLiteConnection>>,
     pub file_name: String,
+    pub crated: DateTimeAsMicroseconds,
 }
 
 impl SqlLitePoolItem {
@@ -24,6 +25,21 @@ impl SqlLitePoolItem {
             last_access: DateTimeAsMicroseconds::now(),
             connection: Arc::new(Mutex::new(connection)),
             file_name,
+            crated: DateTimeAsMicroseconds::now(),
+        }
+    }
+
+    pub async fn recreate(file_name: String) -> Self {
+        let connection = SqlLiteConnectionBuilder::new(file_name.to_string())
+            .build()
+            .await
+            .unwrap();
+
+        Self {
+            last_access: DateTimeAsMicroseconds::now(),
+            connection: Arc::new(Mutex::new(connection)),
+            file_name,
+            crated: DateTimeAsMicroseconds::now(),
         }
     }
 }
@@ -85,16 +101,33 @@ impl SqlLitePool {
         &self,
         hour_key: IntervalKey<HourKey>,
     ) -> Arc<Mutex<SqlLiteConnection>> {
+        let now = DateTimeAsMicroseconds::now();
         let mut write_access = self.pool.lock().await;
 
+        let mut recreate_it: bool = false;
         if let Some(pool_item) = write_access.pool.get_mut(&hour_key) {
-            pool_item.last_access = DateTimeAsMicroseconds::now();
-            return pool_item.connection.clone();
+            if (now - pool_item.crated).get_full_seconds() >= 30 {
+                recreate_it = true;
+            } else {
+                pool_item.last_access = DateTimeAsMicroseconds::now();
+                return pool_item.connection.clone();
+            }
+        }
+
+        if recreate_it {
+            if let Some(connection) = write_access.pool.remove(&hour_key) {
+                let connection = connection.connection.lock().await;
+                connection.close().await;
+            }
         }
 
         let file_name = compile_file_name(&self.file_name_prefix, hour_key);
 
-        let item = SqlLitePoolItem::new(file_name).await;
+        let item = if recreate_it {
+            SqlLitePoolItem::recreate(file_name).await
+        } else {
+            SqlLitePoolItem::new(file_name).await
+        };
 
         let result = item.connection.clone();
         write_access.pool.insert(hour_key, item);
