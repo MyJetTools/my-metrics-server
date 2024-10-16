@@ -154,8 +154,9 @@ impl StatisticsByHourAndServiceName {
         let mut capacity = 0;
 
         for (_, items) in self.data.iter() {
-            size += items.len();
-            capacity += items.get_capacity();
+            let (l, c) = items.get_len_and_capacity();
+            size += l;
+            capacity += c;
         }
 
         (size, capacity)
