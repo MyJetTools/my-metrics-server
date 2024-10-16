@@ -144,4 +144,20 @@ impl StatisticsByHourAndServiceName {
             self.data.remove(&hour_key);
         }
     }
+
+    pub fn get_queue_hours_size(&self) -> (usize, usize) {
+        (self.data.len(), self.to_persist.len())
+    }
+
+    pub fn get_size_and_capacity(&self) -> (usize, usize) {
+        let mut size = 0;
+        let mut capacity = 0;
+
+        for (_, items) in self.data.iter() {
+            size += items.len();
+            capacity += items.get_capacity();
+        }
+
+        (size, capacity)
+    }
 }

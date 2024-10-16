@@ -107,6 +107,35 @@ impl TelemetryReader for GrpcService {
             .await
     }
 
+    async fn get_tech_metrics(
+        &self,
+        _: tonic::Request<()>,
+    ) -> Result<tonic::Response<TechMetricsGrpcModel>, tonic::Status> {
+        let response = {
+            let cache_read_access = self.app.cache.lock().await;
+
+            let queue_hours_size = cache_read_access
+                .statistics_by_hour_and_service_name
+                .get_queue_hours_size();
+
+            let queue_hours_size = cache_read_access
+                .statistics_by_hour_and_service_name
+                .get_size_and_capacity();
+
+            let user_id_links_size = cache_read_access.process_id_user_id_links.get_size();
+
+            TechMetricsGrpcModel {
+                queue_hours_size: queue_hours_size.0 as u64,
+                queue_to_persist_hours_size: queue_hours_size.1 as u64,
+                queue_size: queue_hours_size.0 as u64,
+                queue_capacity: queue_hours_size.1 as u64,
+                user_id_links_size: user_id_links_size as u64,
+            }
+        };
+
+        Ok(tonic::Response::new(response))
+    }
+
     async fn ping(&self, _: tonic::Request<()>) -> Result<tonic::Response<()>, tonic::Status> {
         Ok(tonic::Response::new(()))
     }

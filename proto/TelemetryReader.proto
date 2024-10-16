@@ -73,6 +73,15 @@ message AvailableFileGrpcModel{
     int64 HourAgo = 1;
     uint64 FileSize = 2;
 }
+
+message TechMetricsGrpcModel{
+    uint64 QueueHoursSize = 1;
+    uint64 QueueToPersistHoursSize = 2;
+    uint64 QueueSize = 3;
+    uint64 QueueCapacity = 4;
+    uint64 UserIdLinksSize = 5;
+}
+
 service TelemetryReader {
 
     rpc GetAvailableHoursAgo(google.protobuf.Empty) returns (stream AvailableFileGrpcModel);
@@ -80,6 +89,8 @@ service TelemetryReader {
     rpc GetAppActions(GetByAppRequest) returns (stream AppActionGrpcModel);
     rpc GetAppEventsByAction(GetAppEventsByActionRequest) returns (stream AppDataGrpcModel);
     rpc GetByProcessId(GetByProcessIdRequest) returns (stream MetricEventGrpcModel);
+
+    rpc GetTechMetrics(google.protobuf.Empty) returns (TechMetricsGrpcModel);
     rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
 
  }

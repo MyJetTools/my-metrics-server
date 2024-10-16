@@ -54,4 +54,8 @@ impl ProcessIdUserIdLinks {
 
         Some(&result.user_id)
     }
+
+    pub fn get_size(&self) -> usize {
+        self.items.len()
+    }
 }
