@@ -75,11 +75,13 @@ async fn populate_client_id<'s>(
         .process_id_user_id_links
         .resolve_user_id(chunk.process_id)
     {
+        let len = chunk.items.len();
         for mut metric in chunk.items {
             if metric.name == "dashboard-rest-api" {
                 println!(
-                    "{}. Has client_id for process_id: {:?}",
+                    "{}. Chunk: {}. Has client_id for process_id: {:?}",
                     DateTimeAsMicroseconds::now().unix_microseconds,
+                    len,
                     metric
                 );
             }
@@ -95,8 +97,9 @@ async fn populate_client_id<'s>(
     for metric in chunk.items {
         if metric.name == "dashboard-rest-api" {
             println!(
-                "{}. No client_id for process_id: {:?}",
+                "{}. Chunk:{}, No client_id for process_id: {:?}",
                 DateTimeAsMicroseconds::now().unix_microseconds,
+                len,
                 metric
             );
         }
