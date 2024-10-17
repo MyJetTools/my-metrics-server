@@ -1,9 +1,10 @@
-use rust_extensions::sorted_vec::*;
+use rust_extensions::{date_time::DateTimeAsMicroseconds, sorted_vec::*};
 
 #[derive(Debug)]
 pub struct ProcessIdUserIdLink {
     pub process_id: i64,
     pub user_id: String,
+    pub created_at: DateTimeAsMicroseconds,
 }
 
 impl EntityWithKey<i64> for ProcessIdUserIdLink {
@@ -11,8 +12,6 @@ impl EntityWithKey<i64> for ProcessIdUserIdLink {
         &self.process_id
     }
 }
-
-const MAX_ITEMS_AMOUNT: usize = 1000;
 
 pub struct ProcessIdUserIdLinks {
     pub items: SortedVec<i64, ProcessIdUserIdLink>,
@@ -31,6 +30,7 @@ impl ProcessIdUserIdLinks {
                 insert_entity.insert(ProcessIdUserIdLink {
                     process_id,
                     user_id: user_id.to_string(),
+                    created_at: DateTimeAsMicroseconds::now(),
                 });
             }
             InsertIfNotExists::Exists(_) => {}
@@ -38,8 +38,16 @@ impl ProcessIdUserIdLinks {
     }
 
     pub fn gc(&mut self) {
-        while self.items.len() > MAX_ITEMS_AMOUNT {
-            self.items.pop();
+        let now = DateTimeAsMicroseconds::now();
+        let mut to_remove = Vec::new();
+        for itm in self.items.iter() {
+            if (now - itm.created_at).get_full_seconds() >= 20 {
+                to_remove.push(itm.process_id);
+            }
+        }
+
+        for remove_key in to_remove {
+            self.items.remove(&remove_key);
         }
     }
 
