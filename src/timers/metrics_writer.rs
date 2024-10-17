@@ -78,6 +78,7 @@ async fn populate_client_id<'s>(
     {
         for mut metric in chunk.items {
             if metric.name == "dashboard-rest-api" {
+                println!("Global Client_id: {:?}", client_id);
                 println!(
                     "{}. Chunk: {}. Has client_id for process_id: {:?}",
                     DateTimeAsMicroseconds::now().unix_microseconds,
