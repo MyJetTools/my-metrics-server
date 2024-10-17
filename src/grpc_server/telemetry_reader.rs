@@ -175,6 +175,7 @@ impl TelemetryReader for GrpcService {
             PermanentUserGrpcModel {
                 user_id: model.user,
                 added: model.created,
+                status: model.status,
             }
         })
         .await

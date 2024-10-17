@@ -1,7 +1,6 @@
-use rust_extensions::{
-    date_time::DateTimeAsMicroseconds,
-    sorted_vec::{InsertOrUpdateEntry, SortedVec},
-};
+use std::collections::HashMap;
+
+use rust_extensions::date_time::DateTimeAsMicroseconds;
 use tokio::sync::Mutex;
 
 use crate::{app_ctx::StatisticsCache, db::MetricDto};
@@ -9,13 +8,13 @@ use crate::{app_ctx::StatisticsCache, db::MetricDto};
 use super::MetricsChunkByProcessId;
 
 pub struct ToWriteQueue {
-    pub metrics: Mutex<SortedVec<i64, MetricsChunkByProcessId>>,
+    pub metrics: Mutex<HashMap<i64, MetricsChunkByProcessId>>,
 }
 
 impl ToWriteQueue {
     pub fn new() -> Self {
         Self {
-            metrics: Mutex::new(SortedVec::new()),
+            metrics: Mutex::new(HashMap::new()),
         }
     }
 
@@ -34,13 +33,10 @@ impl ToWriteQueue {
                     .update(new_metric.id, client_id);
             }
 
-            match write_access.insert_or_update(&new_metric.id) {
-                InsertOrUpdateEntry::Insert(insert_entity) => {
-                    insert_entity.insert(MetricsChunkByProcessId::new(new_metric));
-                }
-                InsertOrUpdateEntry::Update(update_entry) => {
-                    update_entry.item.push(new_metric);
-                }
+            if let Some(entity) = write_access.get_mut(&new_metric.id) {
+                entity.push(new_metric);
+            } else {
+                write_access.insert(new_metric.id, MetricsChunkByProcessId::new(new_metric));
             }
         }
     }
@@ -55,7 +51,7 @@ impl ToWriteQueue {
         let mut ready_to_go = Vec::new();
         let mut amount = 0;
 
-        for itm in write_access.iter_mut() {
+        for itm in write_access.values_mut() {
             if (now - itm.created).get_full_seconds() >= 10 {
                 ready_to_go.push(itm.process_id);
                 amount += itm.items.len();
@@ -82,7 +78,7 @@ impl ToWriteQueue {
 
         let mut len = 0;
         let mut capacity = 0;
-        for itm in read_access.iter() {
+        for itm in read_access.values() {
             len += itm.items.len();
             capacity += itm.items.capacity();
         }

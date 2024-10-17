@@ -94,9 +94,17 @@ message DeletePermanentUserGrpcRequest{
     string UserId = 1;
 }
 
+
+enum PermanentUserStatusGrpcModel{
+    InProcess = 0;
+    Added = 1;
+    Deleting = 2;
+}
+
 message PermanentUserGrpcModel{
     string UserId = 1;
     int64 Added = 2;
+    PermanentUserStatusGrpcModel Status = 3;
 }
 
 
