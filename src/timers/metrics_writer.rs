@@ -86,7 +86,7 @@ async fn populate_client_id<'s>(
     }
 
     for metric in chunk.items {
-        if metric.name == "trader-accounts-flows-grpc" {
+        if metric.name == "dashboard-rest-api" {
             println!(
                 "{}. No client_id for process_id: {:?}",
                 DateTimeAsMicroseconds::now().unix_microseconds,
