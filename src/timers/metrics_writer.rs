@@ -71,21 +71,11 @@ async fn populate_client_id<'s>(
     cache: &'s mut StatisticsCache,
     out_put: &mut Vec<MetricDto>,
 ) {
-    let len = chunk.items.len();
     if let Some(client_id) = cache
         .process_id_user_id_links
         .resolve_user_id(chunk.process_id)
     {
         for mut metric in chunk.items {
-            if metric.name == "dashboard-rest-api" {
-                println!("Global Client_id: {:?}", client_id);
-                println!(
-                    "{}. Chunk: {}. Has client_id for process_id: {:?}",
-                    DateTimeAsMicroseconds::now().unix_microseconds,
-                    len,
-                    metric
-                );
-            }
             if metric.client_id.is_none() {
                 metric.client_id = Some(client_id.to_string());
             }
@@ -96,14 +86,6 @@ async fn populate_client_id<'s>(
     }
 
     for metric in chunk.items {
-        if metric.name == "dashboard-rest-api" {
-            println!(
-                "{}. Chunk:{}, No client_id for process_id: {:?}",
-                DateTimeAsMicroseconds::now().unix_microseconds,
-                len,
-                metric
-            );
-        }
         out_put.push(metric);
     }
 }
