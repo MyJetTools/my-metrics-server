@@ -71,11 +71,11 @@ async fn populate_client_id<'s>(
     cache: &'s mut StatisticsCache,
     out_put: &mut Vec<MetricDto>,
 ) {
+    let len = chunk.items.len();
     if let Some(client_id) = cache
         .process_id_user_id_links
         .resolve_user_id(chunk.process_id)
     {
-        let len = chunk.items.len();
         for mut metric in chunk.items {
             if metric.name == "dashboard-rest-api" {
                 println!(
