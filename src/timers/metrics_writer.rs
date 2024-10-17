@@ -60,6 +60,8 @@ impl MyTimerTick for MetricsWriter {
             if (DateTimeAsMicroseconds::now() - started).get_full_seconds() >= 20 {
                 break;
             }
+
+            cache_write_access.process_id_user_id_links.gc();
         }
     }
 }
