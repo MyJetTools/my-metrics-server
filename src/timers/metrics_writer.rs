@@ -76,6 +76,13 @@ async fn populate_client_id<'s>(
         .resolve_user_id(chunk.process_id)
     {
         for mut metric in chunk.items {
+            if metric.name == "dashboard-rest-api" {
+                println!(
+                    "{}. Has client_id for process_id: {:?}",
+                    DateTimeAsMicroseconds::now().unix_microseconds,
+                    metric
+                );
+            }
             if metric.client_id.is_none() {
                 metric.client_id = Some(client_id.to_string());
             }
