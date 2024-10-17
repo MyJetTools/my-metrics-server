@@ -85,5 +85,14 @@ async fn populate_client_id<'s>(
         return;
     }
 
-    out_put.extend(chunk.items);
+    for metric in chunk.items {
+        if metric.name == "trader-accounts-flows-grpc" {
+            println!(
+                "{}. No client_id for process_id: {:?}",
+                DateTimeAsMicroseconds::now().unix_microseconds,
+                metric
+            );
+        }
+        out_put.push(metric);
+    }
 }
