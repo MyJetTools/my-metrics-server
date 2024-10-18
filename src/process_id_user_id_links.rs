@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use ahash::AHashMap;
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 
 #[derive(Debug)]
@@ -9,13 +8,13 @@ pub struct ProcessIdUserIdLink {
 }
 
 pub struct ProcessIdUserIdLinks {
-    pub items: HashMap<i64, ProcessIdUserIdLink>,
+    pub items: AHashMap<i64, ProcessIdUserIdLink>,
 }
 
 impl ProcessIdUserIdLinks {
     pub fn new() -> Self {
         Self {
-            items: HashMap::new(),
+            items: AHashMap::new(),
         }
     }
 

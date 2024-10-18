@@ -56,6 +56,8 @@ tikv-jemallocator = { version = "*", features = [
     "unprefixed_malloc_on_supported_platforms",
 ] }
 
+ahash = "*"
+
 
 [build-dependencies]
 tonic-build = { version = "*", features = ["prost"] }

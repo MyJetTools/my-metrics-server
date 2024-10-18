@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use ahash::AHashMap;
 use rust_extensions::date_time::DateTimeAsMicroseconds;
 use tokio::sync::Mutex;
 
@@ -8,13 +7,13 @@ use crate::{app_ctx::StatisticsCache, db::MetricDto};
 use super::MetricsChunkByProcessId;
 
 pub struct ToWriteQueue {
-    pub metrics: Mutex<HashMap<i64, MetricsChunkByProcessId>>,
+    pub metrics: Mutex<AHashMap<i64, MetricsChunkByProcessId>>,
 }
 
 impl ToWriteQueue {
     pub fn new() -> Self {
         Self {
-            metrics: Mutex::new(HashMap::new()),
+            metrics: Mutex::new(AHashMap::new()),
         }
     }
 
