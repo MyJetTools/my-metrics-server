@@ -127,7 +127,9 @@ impl TelemetryReader for GrpcService {
                 .statistics_by_app_and_data
                 .get_queue_hours_size();
 
-            let user_id_links_size = cache_read_access.process_id_user_id_links.get_size();
+            let (user_id_links_size, user_id_links_capacity) = cache_read_access
+                .process_id_user_id_links
+                .get_size_and_capacity();
 
             TechMetricsGrpcModel {
                 app_data_hours_size: app_data_hour_size.0 as u64,
@@ -139,6 +141,7 @@ impl TelemetryReader for GrpcService {
                 user_id_links_size: user_id_links_size as u64,
                 app_data_size: app_data_size.0 as u64,
                 app_data_capacity: app_data_size.1 as u64,
+                user_id_links_capacity: user_id_links_capacity as u64,
             }
         };
 
