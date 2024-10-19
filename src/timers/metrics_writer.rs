@@ -21,7 +21,14 @@ impl MetricsWriter {
 impl MyTimerTick for MetricsWriter {
     async fn tick(&self) {
         let started = DateTimeAsMicroseconds::now();
-        while let Some(chunks) = self.app.to_write_queue.get_events_to_write(1000).await {
+        let seconds_to_flush = self.app.settings_reader.get_seconds_to_flush().await;
+
+        while let Some(chunks) = self
+            .app
+            .to_write_queue
+            .get_events_to_write(1000, seconds_to_flush)
+            .await
+        {
             let mut events_to_write = Vec::with_capacity(1000);
 
             {
@@ -31,17 +38,7 @@ impl MyTimerTick for MetricsWriter {
                 }
             }
 
-            //let events_amount = events_to_write.len();
-
             let items = self.app.repo.insert(events_to_write).await;
-
-            /*
-            println!(
-                "MetricsWriter written {} metrics in: {:?}",
-                events_amount,
-                sw.duration()
-            );
-             */
 
             let mut cache_write_access = self.app.cache.lock().await;
 

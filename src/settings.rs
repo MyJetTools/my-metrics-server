@@ -18,6 +18,9 @@ pub struct SettingsModel {
     pub hours_to_gc: i64,
     #[serde(rename = "IgnoreEvents")]
     pub ignore_events: Vec<IgnoreEvent>,
+
+    #[serde(rename = "SecondsToFlush")]
+    pub seconds_to_flush: Option<i64>,
 }
 
 impl SettingsReader {
@@ -58,14 +61,14 @@ impl SettingsReader {
 
         result
     }
-    /*
-    pub async fn get_min_events_to_keep_before_gc(&self) -> usize {
-        let read_access = self.settings.read().await;
-        read_access.min_events_to_keep_before_gc
-    }
-    */
+
     pub async fn get_hours_to_gc(&self) -> Duration {
         let read_access = self.settings.read().await;
         Duration::from_secs((read_access.hours_to_gc * 3600) as u64)
+    }
+
+    pub async fn get_seconds_to_flush(&self) -> i64 {
+        let read_access = self.settings.read().await;
+        read_access.seconds_to_flush.unwrap_or(3)
     }
 }

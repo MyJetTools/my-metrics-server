@@ -43,6 +43,7 @@ impl ToWriteQueue {
     pub async fn get_events_to_write(
         &self,
         max_amount: usize,
+        seconds_to_flush: i64,
     ) -> Option<Vec<MetricsChunkByProcessId>> {
         let now = DateTimeAsMicroseconds::now();
         let mut write_access = self.metrics.lock().await;
@@ -51,7 +52,7 @@ impl ToWriteQueue {
         let mut amount = 0;
 
         for itm in write_access.values_mut() {
-            if (now - itm.created).get_full_seconds() >= 3 {
+            if (now - itm.created).get_full_seconds() >= seconds_to_flush {
                 ready_to_go.push(itm.process_id);
                 amount += itm.items.len();
 
