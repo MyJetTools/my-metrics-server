@@ -5,3 +5,5 @@ mod metrics;
 pub use metrics::*;
 mod hour_app_statistics;
 pub use hour_app_statistics::*;
+mod permanent_metrics;
+pub use permanent_metrics::*;

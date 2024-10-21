@@ -30,7 +30,7 @@ impl PermanentUsersList {
         }
     }
 
-    pub fn as_permanent(&self, user_id: &str) -> bool {
+    pub fn is_permanent(&self, user_id: &str) -> bool {
         self.users.contains(user_id)
     }
 

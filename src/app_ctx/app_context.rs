@@ -1,6 +1,6 @@
 use crate::{
     caches::{EventAmountsByHour, StatisticsByAppAndData},
-    db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo},
+    db::{HourAppDataStatisticsRepo, HourStatisticsRepo, MetricsRepo, PermanentMetricsRepo},
     permanent_users::PermanentUsersList,
     process_id_user_id_links::ProcessIdUserIdLinks,
     settings::SettingsReader,
@@ -38,6 +38,8 @@ pub struct AppContext {
     pub process_id: String,
     pub repo: MetricsRepo,
 
+    pub permanent_metrics: PermanentMetricsRepo,
+
     pub settings_reader: Arc<SettingsReader>,
     pub to_write_queue: ToWriteQueue,
     pub cache: Mutex<StatisticsCache>,
@@ -54,9 +56,14 @@ impl AppContext {
             .get_db_file_prefix("h_app_statistics.db")
             .await;
 
+        let permanent_metrics_file_name = settings_reader
+            .get_db_file_prefix("permanent_metrics.db")
+            .await;
+
         let h_statistic_db_file_name = settings_reader.get_db_file_prefix("h_statistics.db").await;
 
         AppContext {
+            permanent_metrics: PermanentMetricsRepo::new(permanent_metrics_file_name).await,
             to_write_queue: ToWriteQueue::new(),
             app_states: Arc::new(AppStates::create_initialized()),
             process_id: uuid::Uuid::new_v4().to_string(),

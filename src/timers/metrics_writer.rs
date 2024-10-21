@@ -4,7 +4,7 @@ use rust_extensions::{date_time::DateTimeAsMicroseconds, MyTimerTick};
 
 use crate::{
     app_ctx::{AppContext, StatisticsCache},
-    db::MetricDto,
+    db::{MetricDto, PermanentMetricDto},
     to_write_queue::MetricsChunkByProcessId,
 };
 
@@ -23,6 +23,8 @@ impl MyTimerTick for MetricsWriter {
         let started = DateTimeAsMicroseconds::now();
         let seconds_to_flush = self.app.settings_reader.get_seconds_to_flush().await;
 
+        let mut do_gc = true;
+
         while let Some(chunks) = self
             .app
             .to_write_queue
@@ -40,25 +42,45 @@ impl MyTimerTick for MetricsWriter {
 
             let items = self.app.repo.insert(events_to_write).await;
 
-            let mut cache_write_access = self.app.cache.lock().await;
+            let mut permanent_items: Vec<PermanentMetricDto> = Vec::new();
 
-            for (interval_key, grouped) in &items {
-                cache_write_access
-                    .statistics_by_app_and_data
-                    .update(*interval_key, grouped);
+            {
+                let mut cache_write_access = self.app.cache.lock().await;
 
-                for metric_dto in grouped {
+                for (interval_key, grouped) in items {
                     cache_write_access
-                        .event_amount_by_hours
-                        .inc(*interval_key, metric_dto);
+                        .statistics_by_app_and_data
+                        .update(interval_key, &grouped);
+
+                    for metric_dto in grouped {
+                        cache_write_access
+                            .event_amount_by_hours
+                            .inc(interval_key, &metric_dto);
+
+                        if let Some(client_id) = &metric_dto.client_id {
+                            if cache_write_access
+                                .permanent_users_list
+                                .is_permanent(client_id)
+                            {
+                                permanent_items.push(metric_dto.into());
+                            }
+                        }
+                    }
                 }
+
+                if do_gc {
+                    cache_write_access.process_id_user_id_links.gc();
+                    do_gc = false;
+                }
+            }
+
+            if permanent_items.len() > 0 {
+                self.app.permanent_metrics.insert(&permanent_items).await
             }
 
             if (DateTimeAsMicroseconds::now() - started).get_full_seconds() >= 20 {
                 break;
             }
-
-            cache_write_access.process_id_user_id_links.gc();
         }
     }
 }
